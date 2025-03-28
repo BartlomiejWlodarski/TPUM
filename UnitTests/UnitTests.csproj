@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TPUMProject.Presentation\TPUMProject.Presentation.csproj" />
     <ProjectReference Include="..\TPUMStart\TPUMStart.csproj" />
   </ItemGroup>
 
