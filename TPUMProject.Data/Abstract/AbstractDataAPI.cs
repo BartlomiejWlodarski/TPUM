@@ -10,6 +10,8 @@ namespace TPUMProject.Data.Abstract
     {
         public abstract IBookRepository BookRepository { get; }
 
+        public abstract IBook CreateBook(string title, string author, decimal price);
+
         public static AbstractDataAPI Create()
         {
             return new DataAPI();

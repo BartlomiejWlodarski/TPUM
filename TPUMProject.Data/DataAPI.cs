@@ -12,5 +12,10 @@ namespace TPUMProject.Data
         private readonly IBookRepository _bookRepository = new BookRepository();
 
         public override IBookRepository BookRepository => _bookRepository;
+
+        public override IBook CreateBook(string title, string author, decimal price)
+        {
+            return new Book { Title = title, Author = author, Price = price };
+        }
     }
 }
