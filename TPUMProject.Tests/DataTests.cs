@@ -6,7 +6,24 @@ namespace TPUMProject.Tests
     public class DataTests
     {
         [TestMethod]
-        public void TestCreateBook()
+        public void BookTest()
+        {
+            AbstractDataAPI dataAPI = AbstractDataAPI.Create();
+
+            IBook book = dataAPI.CreateBook("Pan Tadeusz", "Adam Mickiewicz", 20);
+            IBook book2 = dataAPI.CreateBook("Quo vadis", "Henryk Sienkiewicz", 25);
+
+            Assert.AreEqual("Pan Tadeusz", book.Title);
+
+            Assert.AreEqual("Adam Mickiewicz", book.Author);
+
+            Assert.AreEqual(20, book.Price);
+
+            Assert.AreNotEqual(book.Id, book2.Id);
+        }
+
+        [TestMethod]
+        public void CreateBookTest()
         {
             AbstractDataAPI dataAPI = AbstractDataAPI.Create();
 

@@ -23,5 +23,16 @@ namespace TPUMProject.Data
         {
             return _books.Count;
         }
+
+        public bool RemoveBook(int id)
+        {
+            IBook bookToRemove = _books.FirstOrDefault(b => b.Id == id);
+            if (bookToRemove != null)
+            {
+                _books.Remove(bookToRemove);
+                return true;
+            }
+            return false;
+        }
     }
 }

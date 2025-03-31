@@ -27,5 +27,10 @@ namespace TPUMProject.Logic
             IBook book = _dataAPI.CreateBook(title, author, price);
             _bookRepository.AddBook(book);
         }
+
+        public bool BuyBook(int id)
+        {
+            return _bookRepository.RemoveBook(id);
+        }
     }
 }
