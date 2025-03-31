@@ -10,5 +10,6 @@ namespace TPUMProject.Data.Abstract
     {
         IEnumerable<IBook> GetAllBooks();
         void AddBook(IBook book);
+        public abstract int CountBooks();
     }
 }

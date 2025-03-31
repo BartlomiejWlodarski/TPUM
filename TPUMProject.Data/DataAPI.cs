@@ -17,5 +17,15 @@ namespace TPUMProject.Data
         {
             return new Book { Title = title, Author = author, Price = price };
         }
+
+        public override int CountBooks()
+        {
+            return _bookRepository.CountBooks();
+        }
+
+        public override void AddBook(IBook book)
+        {
+            _bookRepository.AddBook(book);
+        }
     }
 }

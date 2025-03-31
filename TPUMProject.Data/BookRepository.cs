@@ -18,5 +18,10 @@ namespace TPUMProject.Data
             book = new Book { Id = _books.Count + 1, Title = book.Title, Author = book.Author, Price = book.Price };
             _books.Add(book);
         }
+
+        public int CountBooks()
+        {
+            return _books.Count;
+        }
     }
 }
