@@ -16,5 +16,7 @@ namespace TPUMProject.Logic.Abstract
             AbstractDataAPI dataAPI = AbstractDataAPI.Create();
             return new LogicAPI(dataAPI);
         }
+
+        public abstract IBook GetRandomRecommendedBook(IBook currentRecommendedBook);
     }
 }

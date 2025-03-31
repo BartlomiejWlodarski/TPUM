@@ -18,5 +18,10 @@ namespace TPUMProject.Logic
         }
 
         public override IBookService BookService => _bookService;
+
+        public override IBook GetRandomRecommendedBook(IBook currentRecommendedBook)
+        {
+            return _bookService.GetRandomRecommendedBook(currentRecommendedBook);
+        }
     }
 }

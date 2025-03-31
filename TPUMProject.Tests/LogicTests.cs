@@ -35,5 +35,23 @@ namespace TPUMProject.Tests
 
             Assert.AreEqual(false, logicAPI.BookService.BuyBook(1));
         }
+
+        [TestMethod]
+        public void RecommendedBookTest()
+        {
+            AbstractLogicAPI logicAPI = AbstractLogicAPI.Create();
+
+            Assert.AreEqual(false, logicAPI.BookService.BuyBook(0));
+
+            logicAPI.BookService.AddNewBook("Pan Tadeusz", "Adam Mickiewicz", 20);
+            logicAPI.BookService.AddNewBook("Quo vadis", "Henryk Sienkiewicz", 25);
+            logicAPI.BookService.AddNewBook("Chłopi", "Władysław Reymont", 30);
+
+            IBook book = logicAPI.BookService.GetRandomRecommendedBook(logicAPI.BookService.GetAvailableBooks().ToList()[0]);
+
+            Assert.AreNotEqual(logicAPI.BookService.GetAvailableBooks().ToList()[0], book);
+
+            Assert.AreNotEqual(book, logicAPI.BookService.GetRandomRecommendedBook(book));
+        }
     }
 }
