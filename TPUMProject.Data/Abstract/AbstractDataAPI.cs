@@ -12,6 +12,10 @@ namespace TPUMProject.Data.Abstract
 
         public abstract IBook CreateBook(string title, string author, decimal price);
 
+        public abstract int CountBooks();
+
+        public abstract void AddBook(IBook book);
+
         public static AbstractDataAPI Create()
         {
             return new DataAPI();

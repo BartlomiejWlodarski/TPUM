@@ -12,19 +12,17 @@
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageReference Include="xunit" Version="2.5.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TPUMProject.Data\TPUMProject.Data.csproj" />
     <ProjectReference Include="..\TPUMProject.Logic\TPUMProject.Logic.csproj" />
-    <ProjectReference Include="..\TPUMProject.Presentation\TPUMProject.Presentation.csproj" />
-    <ProjectReference Include="..\TPUMStart\TPUMStart.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Xunit" />
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
 
 </Project>
