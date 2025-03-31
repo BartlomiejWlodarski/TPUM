@@ -13,9 +13,17 @@ namespace TPUMProject.Data
 
         public override IBookRepository BookRepository => _bookRepository;
 
+        private int _nextBookId = 0;
+
         public override IBook CreateBook(string title, string author, decimal price)
         {
-            return new Book { Title = title, Author = author, Price = price };
+            return new Book
+            {
+                Id = _nextBookId++,
+                Title = title,
+                Author = author,
+                Price = price
+            };
         }
 
         public override int CountBooks()

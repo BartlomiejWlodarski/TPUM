@@ -7,7 +7,7 @@ namespace TPUMProject.Tests
     public class LogicTests
     {
         [TestMethod]
-        public void TestAddNewBook()
+        public void AddNewBookTest()
         {
             AbstractLogicAPI logicAPI = AbstractLogicAPI.Create();
 
@@ -16,6 +16,24 @@ namespace TPUMProject.Tests
             logicAPI.BookService.AddNewBook("Pan Tadeusz", "Adam Mickiewicz", 20);
 
             Assert.AreEqual(1, logicAPI.BookService.GetAvailableBooks().Count());
+        }
+
+        [TestMethod]
+        public void BuyBookTest()
+        {
+            AbstractLogicAPI logicAPI = AbstractLogicAPI.Create();
+
+            Assert.AreEqual(false, logicAPI.BookService.BuyBook(0));
+
+            logicAPI.BookService.AddNewBook("Pan Tadeusz", "Adam Mickiewicz", 20);
+
+            Assert.AreEqual(false, logicAPI.BookService.BuyBook(0));
+
+            Assert.AreEqual(true, logicAPI.BookService.BuyBook(1));
+
+            Assert.AreEqual(0, logicAPI.BookService.GetAvailableBooks().Count());
+
+            Assert.AreEqual(false, logicAPI.BookService.BuyBook(1));
         }
     }
 }

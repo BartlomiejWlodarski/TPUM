@@ -11,5 +11,6 @@ namespace TPUMProject.Logic.Abstract
     {
         IEnumerable<IBook> GetAvailableBooks();
         void AddNewBook(string title, string author, decimal price);
+        bool BuyBook(int id);
     }
 }
