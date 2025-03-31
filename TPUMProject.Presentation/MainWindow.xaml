@@ -4,9 +4,23 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TPUMProject.Presentation"
+        xmlns:vm="clr-namespace:TPUMProject.Presentation.ViewModel"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Book Store" Height="450" Width="800">
+    <Window.DataContext>
+        <vm:MainWindowViewModel/>
+    </Window.DataContext>
     <Grid>
-
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition>
+                
+            </ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition>
+                
+            </RowDefinition>
+        </Grid.RowDefinitions>
+        <TextBox Text="{Binding TestString, UpdateSourceTrigger=PropertyChanged}"/>
     </Grid>
 </Window>
