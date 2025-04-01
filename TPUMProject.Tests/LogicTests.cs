@@ -12,7 +12,7 @@ namespace TPUMProject.Tests
         [TestInitialize]
         public void Setup()
         {
-            _dataAPI = AbstractDataAPI.Create("testUser", 50);
+            _dataAPI = new FakeDataAPI("testUser", 50);
             _logicAPI = AbstractLogicAPI.Create(_dataAPI);
         }
 
