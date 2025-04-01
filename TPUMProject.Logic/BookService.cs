@@ -16,10 +16,18 @@ namespace TPUMProject.Logic
         private readonly IBookRepository _bookRepository;
         private readonly AbstractDataAPI _dataAPI;
 
+        public event EventHandler<LogicBookRepositoryChangedEventArgs>? BookRepositoryChanged;
+
+        private void HandleOnBookRepositoryChanged(object sender, BookRepositoryChangedEventArgs e)
+        {
+            BookRepositoryChanged?.Invoke(this, new LogicBookRepositoryChangedEventArgs(e));
+        }
+
         public BookService(AbstractDataAPI dataAPI)
         {
             _dataAPI = dataAPI;
             _bookRepository = dataAPI.BookRepository;
+            _bookRepository.BookRepositoryChangedHandler += HandleOnBookRepositoryChanged;
         }
 
         public IEnumerable<IBook> GetAvailableBooks() => _bookRepository.GetAllBooks();
@@ -54,7 +62,9 @@ namespace TPUMProject.Logic
                 if (books[i].Id == recommendedID)
                 {
                     recommendedID = books[i].Id;
-                    books[i].Recommended = false;
+                    //books[i].Recommended = false;
+                    _bookRepository.ChangeBookRecommended(books[i],false);
+
                     break;
                 }
             }
@@ -74,7 +84,8 @@ namespace TPUMProject.Logic
             {
                 if (books[i].Id == newRecommended.Id)
                 {
-                    books[i].Recommended = true;
+                    //books[i].Recommended = true;
+                    _bookRepository.ChangeBookRecommended(books[i], true);
                     break;
                 }
             }

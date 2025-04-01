@@ -42,6 +42,11 @@ namespace TPUMProject.Presentation.ViewModel
             Buy = new RelayCommand(() => RelayBuy());
         }
 
+        private void HandleBookRepositoryChanged(object sender, ModelBookRepositoryChangedEventArgs e)
+        {
+
+        }
+
         public ObservableCollection<IBook> Books { get; } = new ObservableCollection<IBook>();
 
         private int selectedIndex = 0;
