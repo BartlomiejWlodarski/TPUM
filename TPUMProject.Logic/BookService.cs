@@ -16,10 +16,18 @@ namespace TPUMProject.Logic
         private readonly IBookRepository _bookRepository;
         private readonly AbstractDataAPI _dataAPI;
 
+        public event EventHandler<LogicBookRepositoryChangedEventArgs>? BookRepositoryChanged;
+
+        private void HandleOnBookRepositoryChanged(object sender, BookRepositoryChangedEventArgs e)
+        {
+            BookRepositoryChanged?.Invoke(this, new LogicBookRepositoryChangedEventArgs(e));
+        }
+
         public BookService(AbstractDataAPI dataAPI)
         {
             _dataAPI = dataAPI;
             _bookRepository = dataAPI.BookRepository;
+            _bookRepository.BookRepositoryChangedHandler += HandleOnBookRepositoryChanged;
         }
 
         public IEnumerable<IBook> GetAvailableBooks() => _bookRepository.GetAllBooks();

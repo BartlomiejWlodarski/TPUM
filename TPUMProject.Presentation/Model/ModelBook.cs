@@ -18,16 +18,15 @@ namespace TPUMProject.Presentation.Model
         Mystery,
         Science_Fiction
     }
+
     public class ModelBook : INotifyPropertyChanged
     {
-        
-
-        int Id { get; set; }
-        string Title { get; set; }
-        string Author { get; set; }
-        ModelGenre Genre { get; set; }
-        decimal Price { get; set; }
-        bool Recommended { get; set; }
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Author { get; set; }
+        public ModelGenre Genre { get; set; }
+        public decimal Price { get; set; }
+        public bool Recommended { get; set; }
 
         public ModelBook(IBook book)
         {
@@ -38,6 +37,15 @@ namespace TPUMProject.Presentation.Model
             Price = book.Price;
             Recommended = book.Recommended;
         }
+        public ModelBook(int id, string title, string author, ModelGenre genre, decimal price, bool recommended)
+        {
+            Id = id;
+            Title = title;
+            Author = author;
+            Genre = genre;
+            Price = price;
+            Recommended = recommended;
+        }
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -45,4 +53,5 @@ namespace TPUMProject.Presentation.Model
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
+
 }

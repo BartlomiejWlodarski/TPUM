@@ -8,20 +8,28 @@ namespace TPUMProject.Data.Abstract
 {
     public interface IBookRepository
     {
-        public event EventHandler<BookAddedEventArgs> BookAddedHandler;
+        public event EventHandler<BookRepositoryChangedEventArgs> BookRepositoryChangedHandler;
         IEnumerable<IBook> GetAllBooks();
         void AddBook(IBook book);
         public abstract int CountBooks();
         bool RemoveBook(int id);
     }
 
-    public class BookAddedEventArgs : EventArgs
+    public enum BookRepositoryChangedEventType
     {
-           public IBook bookAdded;
+        Added,
+        Removed,
+        Modified
+    }
+    public class BookRepositoryChangedEventArgs : EventArgs
+    {
+        public IBook bookAffected;
+        public BookRepositoryChangedEventType EventType;
 
-        public BookAddedEventArgs(IBook bookAdded)
+        public BookRepositoryChangedEventArgs(IBook bookAffected, BookRepositoryChangedEventType changeType)
         {
-            this.bookAdded = bookAdded;
+            this.bookAffected = bookAffected;
+            this.EventType = changeType;
         }
     }
 }
