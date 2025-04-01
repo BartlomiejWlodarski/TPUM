@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using TPUMProject.Data.Abstract;
 
 namespace TPUMProject.Presentation.Model
@@ -27,6 +29,7 @@ namespace TPUMProject.Presentation.Model
         public ModelGenre Genre { get; set; }
         public decimal Price { get; set; }
         public bool Recommended { get; set; }
+        public SolidColorBrush backcolor { get; set; }
 
         public ModelBook(IBook book)
         {
@@ -36,6 +39,14 @@ namespace TPUMProject.Presentation.Model
             Genre = (ModelGenre)book.Genre;
             Price = book.Price;
             Recommended = book.Recommended;
+            if (Recommended)
+            {
+                backcolor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255,215,0));
+            }
+            else
+            {
+                backcolor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(240, 240, 240));
+            }
         }
         public ModelBook(int id, string title, string author, ModelGenre genre, decimal price, bool recommended)
         {
@@ -45,6 +56,14 @@ namespace TPUMProject.Presentation.Model
             Genre = genre;
             Price = price;
             Recommended = recommended;
+            if (Recommended)
+            {
+                backcolor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 215, 0));
+            }
+            else
+            {
+                backcolor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(220, 210, 220));
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
