@@ -10,6 +10,7 @@ namespace TPUMProject.Logic.Abstract
     public interface IBookService
     {
         public event EventHandler<LogicBookRepositoryChangedEventArgs> BookRepositoryChanged;
+        public event EventHandler<LogicUserChangedEventArgs> UserChanged;
 
         IEnumerable<IBook> GetAvailableBooks();
         void AddNewBook(string title, string author, decimal price);
@@ -32,6 +33,21 @@ namespace TPUMProject.Logic.Abstract
         {
             AffectedBook = args.bookAffected;
             ChangedEventType = args.EventType;
+        }
+    }
+
+    public class LogicUserChangedEventArgs : EventArgs
+    {
+        public IUser user;
+        
+        public LogicUserChangedEventArgs(IUser user)
+        {
+            this.user = user;
+        }
+
+        public LogicUserChangedEventArgs(UserChangedEventArgs e)
+        {
+            this.user = e.user;
         }
     }
 }

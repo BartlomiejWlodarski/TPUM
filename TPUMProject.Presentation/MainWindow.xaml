@@ -14,13 +14,32 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="25*"/>
-            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
-            <RowDefinition Height="4*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="8*"/>
         </Grid.RowDefinitions>
-        <ListBox HorizontalContentAlignment="Stretch" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Books}" SelectedIndex="{Binding SelectedIndex}">
+
+        <Grid Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding User.Name}"/>
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding User.Balance}"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Username:"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="User balance:"/>
+        </Grid>
+        
+        <Button Grid.Column="1" Grid.Row="1" Content="{Binding ShoppingButtonContent}" Command="{Binding ChangeList}" FontSize="25"/>
+
+        <ListBox HorizontalContentAlignment="Stretch" Grid.Row="2" Grid.Column="1" ItemsSource="{Binding BooksShow}" SelectedIndex="{Binding SelectedIndex}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid>
@@ -47,6 +66,6 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Button Content="Buy" Command="{Binding Buy}"/>
+        <Button Grid.RowSpan="2" Grid.Column="3" Content="Buy" Command="{Binding Buy}" Visibility="{Binding ButtonVisibility}"/>
     </Grid>
 </Window>

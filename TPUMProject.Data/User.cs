@@ -13,6 +13,8 @@ namespace TPUMProject.Data
         public decimal Balance { get; set; }
         private readonly List<IBook> _purchasedBooks;
 
+        public event EventHandler<UserChangedEventArgs>? UserChanged;
+
         public User(string name, decimal initialBalance)
         {
             Name = name;
@@ -27,6 +29,7 @@ namespace TPUMProject.Data
             if (book != null)
             {
                 _purchasedBooks.Add(book);
+                UserChanged?.Invoke(this, new UserChangedEventArgs(this));
             }
         }
     }
