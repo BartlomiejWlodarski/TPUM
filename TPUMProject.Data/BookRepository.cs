@@ -11,12 +11,15 @@ namespace TPUMProject.Data
     {
         private readonly List<IBook> _books = new();
 
+        public event EventHandler<BookAddedEventArgs> BookAddedHandler;
+
         public IEnumerable<IBook> GetAllBooks() => _books;
 
         public void AddBook(IBook book)
         {
             book = new Book { Id = _books.Count + 1, Title = book.Title, Author = book.Author, Price = book.Price };
             _books.Add(book);
+            BookAddedHandler?.Invoke(this, new BookAddedEventArgs(book));
         }
 
         public int CountBooks()
