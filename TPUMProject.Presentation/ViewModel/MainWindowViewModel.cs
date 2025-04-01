@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using TPUMProject.Data.Abstract;
 using TPUMProject.Presentation.Model;
@@ -38,16 +30,45 @@ namespace TPUMProject.Presentation.ViewModel
         internal MainWindowViewModel(ModelAbstractAPI modelLayerAPI)
         {
             ModelLayer = modelLayerAPI == null ? ModelAbstractAPI.CreateModel() : modelLayerAPI;
-            //Test = new RelayCommand(() => ChangeString());
+            ModelLayer.Changed += HandleBookRepositoryChanged;
+
+            Books = new ObservableCollection<ModelBook>(ModelLayer.ModelRepository.GetAllBooks());
+            
             Buy = new RelayCommand(() => RelayBuy());
         }
 
         private void HandleBookRepositoryChanged(object sender, ModelBookRepositoryChangedEventArgs e)
         {
+            switch (e.BookChangedEventType)
+            {
+                case BookRepositoryChangedEventType.Added:
 
+                    Books.Add(e.AffectedBook);
+                        break;
+                
+                case BookRepositoryChangedEventType.Removed:
+                    Books.Remove(Books.Where(book => book.Id == e.AffectedBook.Id).Single());
+                        break;
+                
+                case BookRepositoryChangedEventType.Modified:
+                    Books[Books.IndexOf(Books.Where(book => book.Id == e.AffectedBook.Id).Single())] = e.AffectedBook;
+                        break;
+            }
         }
 
-        public ObservableCollection<IBook> Books { get; } = new ObservableCollection<IBook>();
+        private ObservableCollection<ModelBook> books;
+        public ObservableCollection<ModelBook> Books 
+        { 
+            get => books;
+            private set
+            {
+                if (books != value)
+                {
+                    books = value;
+                }
+                OnPropertyChanged();
+            }
+        }
 
         private int selectedIndex = 0;
 
@@ -63,7 +84,7 @@ namespace TPUMProject.Presentation.ViewModel
 
         private void RelayBuy()
         {
-            ModelLayer.BuyBook(Books[selectedIndex]);
+            ModelLayer.BuyBook(Books[selectedIndex].Id);
         }
     }
 }

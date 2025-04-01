@@ -37,21 +37,24 @@ namespace TPUMProject.Presentation.Model
             return new ModelLayer(logicAPI ?? AbstractLogicAPI.Create("Marcin",100));
         }
 
-        public abstract bool BuyBook(IBook book);
+        public abstract bool BuyBook(int id);
 
+        public ModelBookRepository ModelRepository;
 
         internal class ModelLayer : ModelAbstractAPI {
 
             private readonly AbstractLogicAPI _logicLayer;
+
             public ModelLayer(AbstractLogicAPI logicLayer)
             {
                 _logicLayer = logicLayer;
+                ModelRepository = new ModelBookRepository(_logicLayer.BookService);
             }
 
-            public override bool BuyBook(IBook book)
+            public override bool BuyBook(int id)
             {
                 //return _logicLayer. Attempt to buy a book here
-                return _logicLayer.BookService.BuyBook(book.Id);
+                return _logicLayer.BookService.BuyBook(id);
             }
 
             public void HandleBookRepositoryChanged(object sender, LogicBookRepositoryChangedEventArgs e)
