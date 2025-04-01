@@ -33,6 +33,7 @@ namespace TPUMProject.Data
             if (bookToRemove != null)
             {
                 _books.Remove(bookToRemove);
+                BookRepositoryChangedHandler?.Invoke(this, new BookRepositoryChangedEventArgs(bookToRemove, BookRepositoryChangedEventType.Removed));
                 return true;
             }
             return false;
