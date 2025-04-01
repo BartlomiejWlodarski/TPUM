@@ -8,6 +8,7 @@ namespace TPUMProject.Data.Abstract
 {
     public abstract class AbstractDataAPI
     {
+        public abstract IUser User { get; }
         public abstract IBookRepository BookRepository { get; }
 
         public abstract IBook CreateBook(string title, string author, decimal price);
@@ -16,9 +17,9 @@ namespace TPUMProject.Data.Abstract
 
         public abstract void AddBook(IBook book);
 
-        public static AbstractDataAPI Create()
+        public static AbstractDataAPI Create(string userName, decimal initialBalance)
         {
-            return new DataAPI();
+            return new DataAPI(userName, initialBalance);
         }
     }
 }

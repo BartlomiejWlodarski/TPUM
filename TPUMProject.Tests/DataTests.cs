@@ -8,7 +8,7 @@ namespace TPUMProject.Tests
         [TestMethod]
         public void BookTest()
         {
-            AbstractDataAPI dataAPI = AbstractDataAPI.Create();
+            AbstractDataAPI dataAPI = AbstractDataAPI.Create("test", 10);
 
             IBook book = dataAPI.CreateBook("Pan Tadeusz", "Adam Mickiewicz", 20);
             IBook book2 = dataAPI.CreateBook("Quo vadis", "Henryk Sienkiewicz", 25);
@@ -25,7 +25,7 @@ namespace TPUMProject.Tests
         [TestMethod]
         public void CreateBookTest()
         {
-            AbstractDataAPI dataAPI = AbstractDataAPI.Create();
+            AbstractDataAPI dataAPI = AbstractDataAPI.Create("test", 10);
 
             Assert.AreEqual(0, dataAPI.CountBooks());
 

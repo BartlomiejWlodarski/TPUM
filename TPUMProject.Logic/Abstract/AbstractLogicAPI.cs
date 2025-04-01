@@ -10,10 +10,11 @@ namespace TPUMProject.Logic.Abstract
     public abstract class AbstractLogicAPI
     {
         public abstract IBookService BookService { get; }
+        public abstract IUser User { get; }
 
-        public static AbstractLogicAPI Create()
+        public static AbstractLogicAPI Create(string userName, decimal initialBalance)
         {
-            AbstractDataAPI dataAPI = AbstractDataAPI.Create();
+            AbstractDataAPI dataAPI = AbstractDataAPI.Create(userName, initialBalance);
             return new LogicAPI(dataAPI);
         }
 

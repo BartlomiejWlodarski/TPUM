@@ -7,6 +7,7 @@ using TPUMProject.Data.Abstract;
 using TPUMProject.Data;
 using TPUMProject.Logic.Abstract;
 using static System.Reflection.Metadata.BlobBuilder;
+using System.Net;
 
 namespace TPUMProject.Logic
 {
@@ -31,7 +32,13 @@ namespace TPUMProject.Logic
 
         public bool BuyBook(int id)
         {
-            return _bookRepository.RemoveBook(id);
+            IBook book = _dataAPI.BookRepository.GetAllBooks().FirstOrDefault(b => b.Id == id);
+            if (book == null || _dataAPI.User.Balance < book.Price)
+                return false;
+
+            _dataAPI.User.Balance -= book.Price;
+            _dataAPI.User.AddPurchasedBook(book);
+            return _dataAPI.BookRepository.RemoveBook(id);
         }
 
         public void GetRandomRecommendedBook()

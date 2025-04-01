@@ -9,7 +9,7 @@ namespace TPUMProject.Tests
         [TestMethod]
         public void AddNewBookTest()
         {
-            AbstractLogicAPI logicAPI = AbstractLogicAPI.Create();
+            AbstractLogicAPI logicAPI = AbstractLogicAPI.Create("test", 10);
 
             Assert.AreEqual(0, logicAPI.BookService.GetAvailableBooks().Count());
 
@@ -21,7 +21,7 @@ namespace TPUMProject.Tests
         [TestMethod]
         public void BuyBookTest()
         {
-            AbstractLogicAPI logicAPI = AbstractLogicAPI.Create();
+            AbstractLogicAPI logicAPI = AbstractLogicAPI.Create("test", 50);
 
             Assert.AreEqual(false, logicAPI.BookService.BuyBook(0));
 
@@ -31,15 +31,19 @@ namespace TPUMProject.Tests
 
             Assert.AreEqual(true, logicAPI.BookService.BuyBook(1));
 
+            Assert.AreEqual(30, logicAPI.User.Balance);
+
             Assert.AreEqual(0, logicAPI.BookService.GetAvailableBooks().Count());
 
             Assert.AreEqual(false, logicAPI.BookService.BuyBook(1));
+
+            // TODO: more buy tests
         }
 
         [TestMethod]
         public void RecommendedBookTest()
         {
-            AbstractLogicAPI logicAPI = AbstractLogicAPI.Create();
+            AbstractLogicAPI logicAPI = AbstractLogicAPI.Create("test", 10);
 
             logicAPI.BookService.AddNewBook("Pan Tadeusz", "Adam Mickiewicz", 20);
             logicAPI.BookService.AddNewBook("Quo vadis", "Henryk Sienkiewicz", 25);
