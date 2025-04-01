@@ -34,24 +34,45 @@ namespace TPUMProject.Logic
             return _bookRepository.RemoveBook(id);
         }
 
-        public IBook GetRandomRecommendedBook(IBook currentRecommendedBook)
+        public void GetRandomRecommendedBook()
         {
             if (_bookRepository.CountBooks() == 0)
-                return null;
+                return;
 
             var books = _bookRepository.GetAllBooks().ToList();
+            int recommendedID = 0;
+            
+            for (int i = 0; i < books.Count(); i++)
+            {
+                if (books[i].Id == recommendedID)
+                {
+                    recommendedID = books[i].Id;
+                    books[i].Recommended = false;
+                    break;
+                }
+            }
+
             Random random = new();
-            IBook newBook;
+            IBook newRecommended;
             int maxAttempts = 10;
 
             do
             {
                 int index = random.Next(books.Count);
-                newBook = books[index];
+                newRecommended = books[index];
             }
-            while (newBook == currentRecommendedBook && --maxAttempts > 0); // TODO: maybe change the check to id or title + author
+            while (newRecommended.Id == recommendedID && --maxAttempts > 0); // TODO: maybe change the check to id or title + author
 
-            return newBook;
+            for (int i = 0; i < books.Count(); i++)
+            {
+                if (books[i].Id == newRecommended.Id)
+                {
+                    books[i].Recommended = true;
+                    break;
+                }
+            }
+
+            return;
         }
     }
 }
