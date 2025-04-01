@@ -31,13 +31,13 @@ namespace TPUMProject.Tests
         [TestMethod]
         public void CreateBookTest()
         {
-            Assert.AreEqual(0, _dataAPI.CountBooks());
+            Assert.AreEqual(3, _dataAPI.CountBooks());
 
             IBook book = _dataAPI.CreateBook("Pan Tadeusz", "Adam Mickiewicz", 20);
 
             _dataAPI.AddBook(book);
 
-            Assert.AreEqual(1, _dataAPI.CountBooks());
+            Assert.AreEqual(4, _dataAPI.CountBooks());
         }
     }
 }
