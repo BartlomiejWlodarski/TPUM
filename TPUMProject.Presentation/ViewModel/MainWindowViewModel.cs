@@ -13,14 +13,14 @@ using TPUMProject.Presentation.Model;
 
 namespace TPUMProject.Presentation.ViewModel
 {
-    public class MainWindowViewModel : IDisposable, INotifyPropertyChanged
+    public class MainWindowViewModel : BaseViewModel
     {
         private ModelAbstractAPI ModelLayer;
         private bool Disposed = false;
         private string _testString = string.Empty;
 
         //public ICommand Previous { get; set; }
-        //public ICommand Next { get; set; }
+        public ICommand Buy { get; set; }
 
         public string TestString
         {
@@ -28,7 +28,7 @@ namespace TPUMProject.Presentation.ViewModel
             set
             {
                 _testString = value;
-                RaisePropertyChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -39,6 +39,7 @@ namespace TPUMProject.Presentation.ViewModel
         {
             ModelLayer = modelLayerAPI == null ? ModelAbstractAPI.CreateModel() : modelLayerAPI;
             //Test = new RelayCommand(() => ChangeString());
+            Buy = new RelayCommand(() => RelayBuy());
         }
 
         public ObservableCollection<IBook> Books { get; } = new ObservableCollection<IBook>();
@@ -51,32 +52,13 @@ namespace TPUMProject.Presentation.ViewModel
             set
             {
                 selectedIndex = value;
-                RaisePropertyChanged();
+                OnPropertyChanged();
             }
         }
 
-        protected virtual void Dispose(bool disposing)
+        private void RelayBuy()
         {
-            if (!Disposed)
-            {
-                if (disposing)
-                {
-                    
-                }
-                Disposed = true;
-            }
-        }
-        public void Dispose()
-        {
-            if(Disposed) throw new ObjectDisposedException(nameof(MainWindowViewModel));
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected virtual void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            ModelLayer.BuyBook(Books[selectedIndex]);
         }
     }
 }

@@ -47,5 +47,6 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+        <Button Content="Buy" Command="{Binding Buy}"/>
     </Grid>
 </Window>
