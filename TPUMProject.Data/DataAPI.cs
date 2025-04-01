@@ -23,6 +23,9 @@ namespace TPUMProject.Data
         {
             _user = new User(userName, initialBalance);
             _bookRepository = new BookRepository();
+            _bookRepository.AddBook(CreateBook("Pan Tadeusz", "Adam Mickiewicz", 20));
+            _bookRepository.AddBook(CreateBook("Romeo i Julia", "Szekspir", 25));
+            _bookRepository.AddBook(CreateBook("Quo vadis", "Henryk Sienkiewicz", 27));
         }
 
         public override IBook CreateBook(string title, string author, decimal price)

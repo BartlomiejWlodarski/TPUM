@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows.Input;
 using TPUMProject.Data.Abstract;
 using TPUMProject.Presentation.Model;
@@ -11,7 +12,6 @@ namespace TPUMProject.Presentation.ViewModel
         private bool Disposed = false;
         private string _testString = string.Empty;
 
-        //public ICommand Previous { get; set; }
         public ICommand Buy { get; set; }
 
         public string TestString

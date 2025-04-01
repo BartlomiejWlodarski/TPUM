@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,12 +49,12 @@ namespace TPUMProject.Presentation.Model
             public ModelLayer(AbstractLogicAPI logicLayer)
             {
                 _logicLayer = logicLayer;
+                _logicLayer.BookService.BookRepositoryChanged += HandleBookRepositoryChanged;
                 ModelRepository = new ModelBookRepository(_logicLayer.BookService);
             }
 
             public override bool BuyBook(int id)
             {
-                //return _logicLayer. Attempt to buy a book here
                 return _logicLayer.BookService.BuyBook(id);
             }
 
