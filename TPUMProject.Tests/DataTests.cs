@@ -5,11 +5,12 @@ namespace TPUMProject.Tests
     [TestClass]
     public class DataTests
     {
-        private readonly AbstractDataAPI _dataAPI;
+        private AbstractDataAPI _dataAPI;
 
-        public DataTests()
+        [TestInitialize]
+        public void Setup()
         {
-            _dataAPI = AbstractDataAPI.Create("testUser", 10);
+            _dataAPI = AbstractDataAPI.Create("testUser", 50);
         }
 
         [TestMethod]

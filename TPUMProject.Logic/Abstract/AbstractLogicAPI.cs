@@ -18,6 +18,11 @@ namespace TPUMProject.Logic.Abstract
             return new LogicAPI(dataAPI);
         }
 
+        public static AbstractLogicAPI Create(AbstractDataAPI dataAPI)
+        {
+            return new LogicAPI(dataAPI);
+        }
+
         public abstract void GetRandomRecommendedBook();
     }
 }

@@ -6,11 +6,14 @@ namespace TPUMProject.Tests
     [TestClass]
     public class LogicTests
     {
-        private readonly AbstractLogicAPI _logicAPI;
+        private AbstractDataAPI _dataAPI;
+        private AbstractLogicAPI _logicAPI;
 
-        public LogicTests()
+        [TestInitialize]
+        public void Setup()
         {
-            _logicAPI = AbstractLogicAPI.Create("testUser", 50);
+            _dataAPI = AbstractDataAPI.Create("testUser", 50);
+            _logicAPI = AbstractLogicAPI.Create(_dataAPI);
         }
 
         [TestMethod]
