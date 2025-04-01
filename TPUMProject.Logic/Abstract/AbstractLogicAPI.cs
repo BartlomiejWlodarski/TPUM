@@ -17,6 +17,6 @@ namespace TPUMProject.Logic.Abstract
             return new LogicAPI(dataAPI);
         }
 
-        public abstract IBook GetRandomRecommendedBook(IBook currentRecommendedBook);
+        public abstract void GetRandomRecommendedBook();
     }
 }

@@ -13,6 +13,7 @@ namespace TPUMProject.Data
         public string Title { get; set; }
         public string Author { get; set; }
         public decimal Price { get; set; }
+        public bool Recommended { get; set; } = false;
 
         public override string ToString()
         {
