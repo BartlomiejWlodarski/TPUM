@@ -13,6 +13,8 @@ namespace TPUMProject.Data.Abstract
         void AddBook(IBook book);
         public abstract int CountBooks();
         bool RemoveBook(int id);
+
+        void ChangeBookRecommended(IBook book, bool recommended);
     }
 
     public enum BookRepositoryChangedEventType

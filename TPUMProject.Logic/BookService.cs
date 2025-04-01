@@ -62,7 +62,9 @@ namespace TPUMProject.Logic
                 if (books[i].Id == recommendedID)
                 {
                     recommendedID = books[i].Id;
-                    books[i].Recommended = false;
+                    //books[i].Recommended = false;
+                    _bookRepository.ChangeBookRecommended(books[i],false);
+
                     break;
                 }
             }
@@ -82,7 +84,8 @@ namespace TPUMProject.Logic
             {
                 if (books[i].Id == newRecommended.Id)
                 {
-                    books[i].Recommended = true;
+                    //books[i].Recommended = true;
+                    _bookRepository.ChangeBookRecommended(books[i], true);
                     break;
                 }
             }
