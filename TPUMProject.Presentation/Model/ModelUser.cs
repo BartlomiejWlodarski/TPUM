@@ -6,16 +6,17 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using TPUMProject.Data.Abstract;
+using TPUMProject.Logic.Abstract;
 
 namespace TPUMProject.Presentation.Model
 {
-    public class ModelUser : INotifyPropertyChanged
+    public class ModelUser : IModelUser,INotifyPropertyChanged
     {
         public string Name { get; }
         public decimal Balance {get; set;}
-        public IEnumerable<ModelBook> PurchasedBooks { get; }
+        public IEnumerable<IModelBook> PurchasedBooks { get; }
 
-        public ModelUser(IUser user)
+        public ModelUser(ILogicUser user)
         {
             this.Name = user.Name;
             this.Balance = user.Balance;

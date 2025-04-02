@@ -20,34 +20,36 @@ namespace TPUMProject.Logic.Abstract
 
     public class LogicBookRepositoryChangedEventArgs : EventArgs
     {
-        public IBook AffectedBook;
+        public ILogicBook AffectedBook;
         public BookRepositoryChangedEventType ChangedEventType;
 
         public LogicBookRepositoryChangedEventArgs(IBook affectedBoook, BookRepositoryChangedEventType changedEventType)
         {
-            AffectedBook = affectedBoook;
+            //AffectedBook = affectedBoook;
+            AffectedBook = new LogicBook(affectedBoook);
             ChangedEventType = changedEventType;
         }
 
         public LogicBookRepositoryChangedEventArgs(BookRepositoryChangedEventArgs args)
         {
-            AffectedBook = args.bookAffected;
+            //AffectedBook = args.bookAffected;
+            AffectedBook = new LogicBook(args.bookAffected);
             ChangedEventType = args.EventType;
         }
     }
 
     public class LogicUserChangedEventArgs : EventArgs
     {
-        public IUser user;
+        public ILogicUser user;
         
         public LogicUserChangedEventArgs(IUser user)
         {
-            this.user = user;
+            this.user = new LogicUser(user);
         }
 
         public LogicUserChangedEventArgs(UserChangedEventArgs e)
         {
-            this.user = e.user;
+            this.user = new LogicUser(e.user);
         }
     }
 }

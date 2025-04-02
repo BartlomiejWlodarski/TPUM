@@ -8,20 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using TPUMProject.Data.Abstract;
+using TPUMProject.Logic.Abstract;
 
 namespace TPUMProject.Presentation.Model
 {
-    public enum ModelGenre
-    {
-        Uncategorized,
-        Action,
-        Drama,
-        Romance,
-        Mystery,
-        Science_Fiction
-    }
-
-    public class ModelBook : INotifyPropertyChanged
+    public class ModelBook : IModelBook,INotifyPropertyChanged
     {
         public int Id { get; set; }
         public string Title { get; set; }
@@ -31,7 +22,7 @@ namespace TPUMProject.Presentation.Model
         public bool Recommended { get; set; }
         public SolidColorBrush backcolor { get; set; }
 
-        public ModelBook(IBook book)
+        public ModelBook(ILogicBook book)
         {
             Id = book.Id;
             Title = book.Title;
@@ -63,6 +54,24 @@ namespace TPUMProject.Presentation.Model
             else
             {
                 backcolor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(220, 210, 220));
+            }
+        }
+
+        public ModelBook(IBook book)
+        {
+            Id = book.Id;
+            Title = book.Title;
+            Author = book.Author;
+            Genre = (ModelGenre)book.Genre;
+            Price = book.Price;
+            Recommended = book.Recommended;
+            if (Recommended)
+            {
+                backcolor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 215, 0));
+            }
+            else
+            {
+                backcolor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(240, 240, 240));
             }
         }
 

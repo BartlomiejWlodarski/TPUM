@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TPUMProject.Data.Abstract;
+﻿using TPUMProject.Data.Abstract;
 using TPUMProject.Logic.Abstract;
 
 namespace TPUMProject.Presentation.Model
@@ -13,10 +6,10 @@ namespace TPUMProject.Presentation.Model
 
     public class ModelBookRepositoryChangedEventArgs : EventArgs
     {
-        public ModelBook AffectedBook;
+        public IModelBook AffectedBook;
         public BookRepositoryChangedEventType BookChangedEventType;
 
-        public ModelBookRepositoryChangedEventArgs(ModelBook affectedBook, BookRepositoryChangedEventType bookChangedEventType)
+        public ModelBookRepositoryChangedEventArgs(IModelBook affectedBook, BookRepositoryChangedEventType bookChangedEventType)
         {
             AffectedBook = affectedBook;
             BookChangedEventType = bookChangedEventType;
@@ -31,9 +24,9 @@ namespace TPUMProject.Presentation.Model
 
     public class ModelUserChangedEventArgs : EventArgs
     {
-        public ModelUser user;
+        public IModelUser user;
 
-        public ModelUserChangedEventArgs(IUser user)
+        public ModelUserChangedEventArgs(ILogicUser user)
         {
             this.user = new ModelUser(user);
         }
@@ -57,7 +50,7 @@ namespace TPUMProject.Presentation.Model
         public abstract bool BuyBook(int id);
 
         public ModelBookRepository ModelRepository;
-        public ModelUser User;
+        public IModelUser User;
 
         internal class ModelLayer : ModelAbstractAPI {
 
@@ -69,7 +62,7 @@ namespace TPUMProject.Presentation.Model
                 _logicLayer.BookService.BookRepositoryChanged += HandleBookRepositoryChanged;
                 _logicLayer.BookService.UserChanged += HandleUserChanged;
                 ModelRepository = new ModelBookRepository(_logicLayer.BookService);
-                User = new ModelUser(_logicLayer.User);
+                User = new ModelUser(_logicLayer.GetUser());
             }
 
             public override bool BuyBook(int id)

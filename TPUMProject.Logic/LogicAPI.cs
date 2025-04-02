@@ -27,5 +27,10 @@ namespace TPUMProject.Logic
         {
             _bookService.GetRandomRecommendedBook();
         }
+
+        public override ILogicUser GetUser()
+        {
+            return new LogicUser(User);
+        }
     }
 }

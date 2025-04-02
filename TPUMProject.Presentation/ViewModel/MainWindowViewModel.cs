@@ -11,8 +11,8 @@ namespace TPUMProject.Presentation.ViewModel
     {
         private ModelAbstractAPI ModelLayer;
         private bool CatalogActive = true;
-        private ModelUser _user;
-        public ModelUser User
+        private IModelUser _user;
+        public IModelUser User
         {
             get => _user;
             set
@@ -50,7 +50,7 @@ namespace TPUMProject.Presentation.ViewModel
             ModelLayer.Changed += HandleBookRepositoryChanged;
             ModelLayer.UserChanged += HandleUserChanged;
 
-            Books = new ObservableCollection<ModelBook>(ModelLayer.ModelRepository.GetAllBooks());
+            Books = new ObservableCollection<IModelBook>(ModelLayer.ModelRepository.GetAllBooks());
             User = ModelLayer.User;
             BooksShow = Books;
             
@@ -82,8 +82,8 @@ namespace TPUMProject.Presentation.ViewModel
             }
         }
 
-        private ObservableCollection<ModelBook> books;
-        public ObservableCollection<ModelBook> Books 
+        private ObservableCollection<IModelBook> books;
+        public ObservableCollection<IModelBook> Books 
         { 
             get => books;
             private set
@@ -95,8 +95,8 @@ namespace TPUMProject.Presentation.ViewModel
                 }
             }
         }
-        private ObservableCollection<ModelBook> _booksShow;
-        public ObservableCollection<ModelBook> BooksShow
+        private ObservableCollection<IModelBook> _booksShow;
+        public ObservableCollection<IModelBook> BooksShow
         {
             get => _booksShow;
             private set
@@ -142,7 +142,7 @@ namespace TPUMProject.Presentation.ViewModel
             if(CatalogActive)
             {
                 CatalogActive = false;
-                BooksShow = new ObservableCollection<ModelBook>(User.PurchasedBooks);
+                BooksShow = new ObservableCollection<IModelBook>(User.PurchasedBooks);
                 ShoppingButtonContent = _shopList;
                 ButtonVisibility = Visibility.Hidden;
             } 
