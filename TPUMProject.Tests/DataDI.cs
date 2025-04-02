@@ -53,6 +53,8 @@ namespace TPUMProject.Tests
         public decimal Balance { get; set; }
         private readonly List<IBook> _purchasedBooks;
 
+        public event EventHandler<UserChangedEventArgs>? UserChanged;
+
         public FakeUser(string name, decimal initialBalance)
         {
             Name = name;
@@ -67,6 +69,7 @@ namespace TPUMProject.Tests
             if (book != null)
             {
                 _purchasedBooks.Add(book);
+                UserChanged?.Invoke(this, new UserChangedEventArgs(this));
             }
         }
     }
