@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TPUMProject.Data.Abstract;
-using TPUMProject.Data;
+﻿using TPUMProject.Data.Abstract;
 using TPUMProject.Logic.Abstract;
-using static System.Reflection.Metadata.BlobBuilder;
-using System.Net;
 
 namespace TPUMProject.Logic
 {
@@ -43,7 +35,7 @@ namespace TPUMProject.Logic
             StartRecommending();
         }
 
-        public IEnumerable<IBook> GetAvailableBooks() => _bookRepository.GetAllBooks();
+        public IEnumerable<ILogicBook> GetAvailableBooks() => _bookRepository.GetAllBooks().Select(book => new LogicBook(book));
 
         public void AddNewBook(string title, string author, decimal price)
         {

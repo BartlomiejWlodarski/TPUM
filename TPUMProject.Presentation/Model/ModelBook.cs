@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
-using TPUMProject.Data.Abstract;
 using TPUMProject.Logic.Abstract;
 
 namespace TPUMProject.Presentation.Model
@@ -54,24 +47,6 @@ namespace TPUMProject.Presentation.Model
             else
             {
                 backcolor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(220, 210, 220));
-            }
-        }
-
-        public ModelBook(IBook book)
-        {
-            Id = book.Id;
-            Title = book.Title;
-            Author = book.Author;
-            Genre = (ModelGenre)book.Genre;
-            Price = book.Price;
-            Recommended = book.Recommended;
-            if (Recommended)
-            {
-                backcolor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 215, 0));
-            }
-            else
-            {
-                backcolor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(240, 240, 240));
             }
         }
 

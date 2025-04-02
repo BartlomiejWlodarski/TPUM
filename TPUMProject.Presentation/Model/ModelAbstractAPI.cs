@@ -1,5 +1,4 @@
-﻿using TPUMProject.Data.Abstract;
-using TPUMProject.Logic.Abstract;
+﻿using TPUMProject.Logic.Abstract;
 
 namespace TPUMProject.Presentation.Model
 {
@@ -7,9 +6,9 @@ namespace TPUMProject.Presentation.Model
     public class ModelBookRepositoryChangedEventArgs : EventArgs
     {
         public IModelBook AffectedBook;
-        public BookRepositoryChangedEventType BookChangedEventType;
+        public int BookChangedEventType;
 
-        public ModelBookRepositoryChangedEventArgs(IModelBook affectedBook, BookRepositoryChangedEventType bookChangedEventType)
+        public ModelBookRepositoryChangedEventArgs(IModelBook affectedBook, int bookChangedEventType)
         {
             AffectedBook = affectedBook;
             BookChangedEventType = bookChangedEventType;
@@ -49,7 +48,7 @@ namespace TPUMProject.Presentation.Model
 
         public abstract bool BuyBook(int id);
 
-        public ModelBookRepository ModelRepository;
+        public IModelBookRepository ModelRepository;
         public IModelUser User;
 
         internal class ModelLayer : ModelAbstractAPI {

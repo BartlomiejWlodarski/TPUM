@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TPUMProject.Logic.Abstract;
+﻿using TPUMProject.Logic.Abstract;
 
 namespace TPUMProject.Presentation.Model
 {
-    public class ModelBookRepository
+    public class ModelBookRepository : IModelBookRepository
     {
         private IBookService bookService;
 
@@ -16,9 +11,9 @@ namespace TPUMProject.Presentation.Model
             this.bookService = bookService;
         }
 
-        public List<ModelBook> GetAllBooks()
+        public IEnumerable<IModelBook> GetAllBooks()
         {
-            return bookService.GetAvailableBooks().Select(book => new ModelBook(book)).ToList();
+            return bookService.GetAvailableBooks().Select(book => new ModelBook(book));
         }
     }
 }

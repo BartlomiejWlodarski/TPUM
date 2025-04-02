@@ -1,8 +1,6 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
-using TPUMProject.Data.Abstract;
 using TPUMProject.Presentation.Model;
 
 namespace TPUMProject.Presentation.ViewModel
@@ -67,17 +65,16 @@ namespace TPUMProject.Presentation.ViewModel
         {
             switch (e.BookChangedEventType)
             {
-                case BookRepositoryChangedEventType.Added:
-
-                    Books.Add(e.AffectedBook);
+                case 0:
+                    Books.Add(e.AffectedBook); //Added
                         break;
                 
-                case BookRepositoryChangedEventType.Removed:
-                    Books.Remove(Books.Where(book => book.Id == e.AffectedBook.Id).Single());
-                        break;
+                case 1:
+                    Books.Remove(Books.Where(book => book.Id == e.AffectedBook.Id).Single()); //Removed
+                    break;
                 
-                case BookRepositoryChangedEventType.Modified:
-                    Books[Books.IndexOf(Books.Where(book => book.Id == e.AffectedBook.Id).Single())] = e.AffectedBook;
+                case 2:
+                    Books[Books.IndexOf(Books.Where(book => book.Id == e.AffectedBook.Id).Single())] = e.AffectedBook; // Modified
                         break;
             }
         }
