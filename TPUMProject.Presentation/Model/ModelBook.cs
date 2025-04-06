@@ -5,7 +5,7 @@ using TPUMProject.Logic.Abstract;
 
 namespace TPUMProject.Presentation.Model
 {
-    public class ModelBook : IModelBook,INotifyPropertyChanged
+    internal class ModelBook : IModelBook,INotifyPropertyChanged
     {
         public int Id { get; set; }
         public string Title { get; set; }

@@ -2,7 +2,7 @@
 
 namespace TPUMProject.Presentation.Model
 {
-    public class ModelBookRepository : IModelBookRepository
+    internal class ModelBookRepository : IModelBookRepository
     {
         private IBookService bookService;
 

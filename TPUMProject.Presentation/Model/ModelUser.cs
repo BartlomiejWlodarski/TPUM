@@ -4,7 +4,7 @@ using TPUMProject.Logic.Abstract;
 
 namespace TPUMProject.Presentation.Model
 {
-    public class ModelUser : IModelUser,INotifyPropertyChanged
+    internal class ModelUser : IModelUser,INotifyPropertyChanged
     {
         public string Name { get; }
         public decimal Balance {get; set;}

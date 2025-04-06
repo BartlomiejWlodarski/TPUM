@@ -3,7 +3,7 @@ using TPUMProject.Logic.Abstract;
 
 namespace TPUMProject.Logic
 {
-    public class LogicBook : ILogicBook
+    internal class LogicBook : ILogicBook
     {
         public int Id { get ; set; }
         public string Title { get; set; }
