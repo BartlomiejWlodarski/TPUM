@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClinetAPI\ClinetAPI.csproj" />
+    <ProjectReference Include="..\TPUMProject.Logic\TPUMProject.ServerLogic.csproj" />
   </ItemGroup>
 
 </Project>
