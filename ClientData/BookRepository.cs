@@ -26,5 +26,15 @@ namespace ClientData
             }
             return false;
         }
+
+        public void ChangeBookRecommended(IBook book, bool recommended)
+        {
+            IBook foundBook = _books.Find(bookToFind => bookToFind.Id == book.Id);
+            if (foundBook != null)
+            {
+                foundBook.Recommended = recommended;
+                BookRepositoryChangedHandler?.Invoke(this, new BookRepositoryChangedEventArgs(foundBook, BookRepositoryChangedEventType.Modified));
+            }
+        }
     }
 }
