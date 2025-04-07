@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TPUMProject.Data\TPUMProject.Data.csproj" />
-    <ProjectReference Include="..\TPUMProject.Logic\TPUMProject.Logic.csproj" />
+    <ProjectReference Include="..\TPUMProject.Data\TPUMProject.ServerData.csproj" />
+    <ProjectReference Include="..\TPUMProject.Logic\TPUMProject.ServerLogic.csproj" />
   </ItemGroup>
 
   <ItemGroup>

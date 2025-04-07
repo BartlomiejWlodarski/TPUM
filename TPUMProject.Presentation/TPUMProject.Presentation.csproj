@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TPUMProject.Logic\TPUMProject.Logic.csproj" />
+    <ProjectReference Include="..\TPUMProject.Logic\TPUMProject.ServerLogic.csproj" />
   </ItemGroup>
 
   <ItemGroup>
