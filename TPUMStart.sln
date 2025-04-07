@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.Data", "TPUMProject.Data\TPUMProject.Data.csproj", "{3E1A55DC-2078-4A08-9435-39A3D698806E}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.Logic", "TPUMProject.Logic\TPUMProject.Logic.csproj", "{18A3D4D5-004A-4E67-88BC-3461A9A6BA05}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.Presentation", "TPUMProject.Presentation\TPUMProject.Presentation.csproj", "{45856F6A-F931-46C5-B038-1C345B8BFBE2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.Tests", "TPUMProject.Tests\TPUMProject.Tests.csproj", "{CFE2157E-9818-4BAB-8B68-DE9FFFB81899}"
@@ -15,6 +11,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.ServerData", "TPUMProject.Data\TPUMProject.ServerData.csproj", "{473A1487-A055-4819-8CDF-008A317309A5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.ServerLogic", "TPUMProject.Logic\TPUMProject.ServerLogic.csproj", "{E6BEB090-2A29-491B-A2D8-AD9947CC88BD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClinetAPI", "ClinetAPI\ClinetAPI.csproj", "{A8E32E21-5166-499B-9134-4D3FA0B5689A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientLogic", "ClientLogic\ClientLogic.csproj", "{A8237AA7-881A-4E58-BE45-4B5464FB8FEE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientData", "ClientData\ClientData.csproj", "{9C6484FC-71B6-4E2A-933D-27F3233ED2CF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerPresentation", "ServerPresentation\ServerPresentation.csproj", "{37B9F676-8A03-4E08-9620-E20D6979B66C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +46,30 @@ Global
 		{CFE2157E-9818-4BAB-8B68-DE9FFFB81899}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CFE2157E-9818-4BAB-8B68-DE9FFFB81899}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CFE2157E-9818-4BAB-8B68-DE9FFFB81899}.Release|Any CPU.Build.0 = Release|Any CPU
+		{473A1487-A055-4819-8CDF-008A317309A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{473A1487-A055-4819-8CDF-008A317309A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{473A1487-A055-4819-8CDF-008A317309A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{473A1487-A055-4819-8CDF-008A317309A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6BEB090-2A29-491B-A2D8-AD9947CC88BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6BEB090-2A29-491B-A2D8-AD9947CC88BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6BEB090-2A29-491B-A2D8-AD9947CC88BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6BEB090-2A29-491B-A2D8-AD9947CC88BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8E32E21-5166-499B-9134-4D3FA0B5689A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8E32E21-5166-499B-9134-4D3FA0B5689A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8E32E21-5166-499B-9134-4D3FA0B5689A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8E32E21-5166-499B-9134-4D3FA0B5689A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8237AA7-881A-4E58-BE45-4B5464FB8FEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8237AA7-881A-4E58-BE45-4B5464FB8FEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8237AA7-881A-4E58-BE45-4B5464FB8FEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8237AA7-881A-4E58-BE45-4B5464FB8FEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C6484FC-71B6-4E2A-933D-27F3233ED2CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C6484FC-71B6-4E2A-933D-27F3233ED2CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C6484FC-71B6-4E2A-933D-27F3233ED2CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C6484FC-71B6-4E2A-933D-27F3233ED2CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37B9F676-8A03-4E08-9620-E20D6979B66C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37B9F676-8A03-4E08-9620-E20D6979B66C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37B9F676-8A03-4E08-9620-E20D6979B66C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37B9F676-8A03-4E08-9620-E20D6979B66C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
