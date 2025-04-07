@@ -9,6 +9,7 @@
         IEnumerable<IBook> PurchasedBooks { get; }
 
         void AddPurchasedBook(IBook book);
+        void SetPurchasedBooks(IEnumerable<IBook> books);
     }
 
     public class UserChangedEventArgs : EventArgs

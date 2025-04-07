@@ -5,7 +5,7 @@ namespace TPUMProject.Logic.Abstract
     public abstract class AbstractLogicAPI
     {
         public abstract IBookService BookService { get; }
-        public abstract IEnumerable<ILogicUser> Users { get; }
+        public abstract IEnumerable<IUser> Users { get; }
 
         public static AbstractLogicAPI Create()
         {

@@ -6,7 +6,7 @@ namespace ClientData
     {
         public string Name { get; }
         public decimal Balance { get; set; }
-        private readonly List<IBook> _purchasedBooks;
+        private List<IBook> _purchasedBooks;
 
         public event EventHandler<UserChangedEventArgs>? UserChanged;
 
@@ -18,6 +18,11 @@ namespace ClientData
         }
 
         public IEnumerable<IBook> PurchasedBooks => _purchasedBooks.AsReadOnly();
+
+        public void SetPurchasedBooks(IEnumerable<IBook> purchasedBooks)
+        {
+            _purchasedBooks = purchasedBooks.ToList();
+        }
 
         public void AddPurchasedBook(IBook book)
         {
