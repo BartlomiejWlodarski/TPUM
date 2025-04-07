@@ -6,6 +6,7 @@
         IEnumerable<IBook> GetAllBooks();
         public abstract int CountBooks();
         bool RemoveBook(int id);
+        void ChangeBookRecommended(IBook book, bool recommended);
     }
 
     public enum BookRepositoryChangedEventType
