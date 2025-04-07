@@ -61,7 +61,7 @@ namespace TPUMProject.Presentation.Model
                 _logicLayer.BookService.BookRepositoryChanged += HandleBookRepositoryChanged;
                 _logicLayer.BookService.UserChanged += HandleUserChanged;
                 ModelRepository = new ModelBookRepository(_logicLayer.BookService);
-                User = new ModelUser(_logicLayer.GetUser());
+                //User = new ModelUser(_logicLayer.GetUser());
             }
 
             public override bool BuyBook(int id)

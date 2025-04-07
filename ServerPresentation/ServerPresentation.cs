@@ -50,13 +50,42 @@ namespace ServerPresentation
 
             if(serializer.GetCommandHeader(message) == SellBookCommand.StaticHeader)
             {
-                SellBookCommand sellBook = serializer.Deserialize<SellBookCommand>(message);
-                Task taks = Task.Run(async () => await SendBooks());
+                SellBookCommand sellBookCommand = serializer.Deserialize<SellBookCommand>(message);
+                
+                int result = logicAPI.BookService.BuyBook(sellBookCommand.BookID, sellBookCommand.Username);
+                TransactionResultResponse response = new TransactionResultResponse(sellBookCommand.BookID, sellBookCommand.Username,result);
+
+                string json = serializer.Serialize(response);
+                Console.WriteLine(json);
+
+                await connection.SendAsync(json);
             } 
             else if(serializer.GetCommandHeader(message) == GetBooksCommand.StaticHeader)
             {
+                GetBooksCommand sellBook = serializer.Deserialize<GetBooksCommand>(message);
+                Task taks = Task.Run(async () => await SendBooks());
+            }
+            else if(serializer.GetCommandHeader(message) == GetUserCommand.StaticHeader)
+            {
+                GetUserCommand userCommand = serializer.Deserialize<GetUserCommand>(message);
 
             }
+        }
+
+        private async Task SendUser(string username)
+        {
+            if (connection == null) return;
+
+            Console.WriteLine("Sending user data...");
+
+            UserChangedResponse response = new UserChangedResponse();
+            response.User = logicAPI.GetUser(username).ConvertToDTO();
+
+            Serializer serializer = Serializer.Create();
+            string json = serializer.Serialize(response);
+            Console.WriteLine(json);
+
+            await connection.SendAsync(json);
         }
 
         private async Task SendBooks()

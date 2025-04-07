@@ -124,7 +124,7 @@ namespace ClinetAPI
         public int BookID;
         public string Username;
         public int ResultCode; 
-        // 0 - success 1 - not enought money 2 - book not found 3 - unknown error
+        // 0 - success 1 - not enought money 2 - book not found 3 - user not found 4 - unknown error
 
         public TransactionResultResponse(int bookId, string username, int resultCode) : base(StaticHeader) 
         {  

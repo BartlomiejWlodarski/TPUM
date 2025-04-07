@@ -5,11 +5,11 @@ namespace TPUMProject.Logic.Abstract
     public abstract class AbstractLogicAPI
     {
         public abstract IBookService BookService { get; }
-        public abstract IUser User { get; }
+        public abstract IEnumerable<ILogicUser> Users { get; }
 
-        public static AbstractLogicAPI Create(string userName, decimal initialBalance)
+        public static AbstractLogicAPI Create()
         {
-            AbstractDataAPI dataAPI = AbstractDataAPI.Create(userName, initialBalance);
+            AbstractDataAPI dataAPI = AbstractDataAPI.Create();
             return new LogicAPI(dataAPI);
         }
 
@@ -18,7 +18,7 @@ namespace TPUMProject.Logic.Abstract
             return new LogicAPI(dataAPI);
         }
 
-        public abstract ILogicUser GetUser();
+        public abstract ILogicUser GetUser(string username);
 
         public abstract void GetRandomRecommendedBook();
     }

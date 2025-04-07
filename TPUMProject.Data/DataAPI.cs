@@ -4,9 +4,9 @@ namespace TPUMProject.Data
 {
     internal class DataAPI : AbstractDataAPI
     {
-        private readonly IUser _user;
+        private readonly List<IUser> _users;
 
-        public override IUser User => _user;
+        public override IEnumerable<IUser> Users => _users;
 
         private readonly IBookRepository _bookRepository = new BookRepository();
 
@@ -14,9 +14,10 @@ namespace TPUMProject.Data
 
         private int _nextBookId = 0;
 
-        public DataAPI(string userName, decimal initialBalance)
+        public DataAPI()
         {
-            _user = new User(userName, initialBalance);
+            _users = new List<IUser>();
+            _users.Add(new User("Marcin", 100));
             _bookRepository = new BookRepository();
             _bookRepository.AddBook(CreateBook("Pan Tadeusz", "Adam Mickiewicz", 20));
             _bookRepository.AddBook(CreateBook("Romeo i Julia", "Szekspir", 25));

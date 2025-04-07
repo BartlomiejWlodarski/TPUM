@@ -9,7 +9,7 @@ namespace TPUMProject.Logic.Abstract
 
         IEnumerable<ILogicBook> GetAvailableBooks();
         void AddNewBook(string title, string author, decimal price);
-        bool BuyBook(int id);
+        int BuyBook(int id, string username);
         void GetRandomRecommendedBook();
     }
 

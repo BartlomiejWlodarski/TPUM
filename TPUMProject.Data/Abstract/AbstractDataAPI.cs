@@ -2,7 +2,8 @@
 {
     public abstract class AbstractDataAPI
     {
-        public abstract IUser User { get; }
+        public abstract IEnumerable<IUser> Users { get; }
+
         public abstract IBookRepository BookRepository { get; }
 
         public abstract IBook CreateBook(string title, string author, decimal price);
@@ -11,9 +12,9 @@
 
         public abstract void AddBook(IBook book);
 
-        public static AbstractDataAPI Create(string userName, decimal initialBalance)
+        public static AbstractDataAPI Create()
         {
-            return new DataAPI(userName, initialBalance);
+            return new DataAPI();
         }
     }
 }

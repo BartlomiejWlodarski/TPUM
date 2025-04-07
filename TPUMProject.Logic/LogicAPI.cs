@@ -14,7 +14,7 @@ namespace TPUMProject.Logic
             _bookService = new BookService(dataAPI);
         }
 
-        public override IUser User => _dataAPI.User;
+        public override IEnumerable<IUser> Users => _dataAPI.Users;
 
         public override IBookService BookService => _bookService;
 
@@ -23,9 +23,10 @@ namespace TPUMProject.Logic
             _bookService.GetRandomRecommendedBook();
         }
 
-        public override ILogicUser GetUser()
+        public override ILogicUser GetUser(string username)
         {
-            return new LogicUser(User);
+            IUser user = Users.Where(x => x.Name == username).FirstOrDefault();
+            return new LogicUser(user);
         }
     }
 }

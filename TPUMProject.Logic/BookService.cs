@@ -30,8 +30,10 @@ namespace TPUMProject.Logic
             _dataAPI = dataAPI;
             _bookRepository = dataAPI.BookRepository;
             _bookRepository.BookRepositoryChangedHandler += HandleOnBookRepositoryChanged;
-            _dataAPI.User.UserChanged += HandleOnUserChanged;
-
+            foreach (IUser user in _dataAPI.Users)
+            {
+                user.UserChanged += HandleOnUserChanged;
+            }
             StartRecommending();
         }
 
@@ -46,22 +48,26 @@ namespace TPUMProject.Logic
             }
         }
 
-        public bool BuyBook(int id)
+        public int BuyBook(int id, string username)
         {
             lock (booksLock)
             {
                 IBook book = _dataAPI.BookRepository.GetAllBooks().FirstOrDefault(b => b.Id == id);
-                if (book == null || _dataAPI.User.Balance < book.Price)
-                    return false;
+                IUser? user = _dataAPI.Users.Where(x => x.Name == username).FirstOrDefault();
+                if (book == null) return 2; // Book not found
+
+                if(user == null) return 3; // User not found
+
+                if(user.Balance < book.Price) return 1; // Not enought money
 
                 if(book.Recommended)
                 {
                     _bookRepository.ChangeBookRecommended(book, false);
                 }
 
-                _dataAPI.User.Balance -= book.Price;
-                _dataAPI.User.AddPurchasedBook(book);
-                return _dataAPI.BookRepository.RemoveBook(id);
+                user.Balance -= book.Price;
+                user.AddPurchasedBook(book);
+                return _dataAPI.BookRepository.RemoveBook(id) ? 0 : 4; //0 - success 4 - unknown error;
             }
         }
 
