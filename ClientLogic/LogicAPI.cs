@@ -16,7 +16,7 @@ namespace ClientLogic
             _logicConnectionService = new LogicConnectionService(_dataAPI.GetConnectionService());
         }
 
-        public override IUser User => _dataAPI.User;
+        public override IUser User => _dataAPI.User.user;
 
         public override IBookService BookService => _bookService;
 

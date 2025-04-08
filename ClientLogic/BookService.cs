@@ -32,7 +32,7 @@ namespace ClientLogic
             _dataAPI = dataAPI;
             _bookRepository = dataAPI.BookRepository;
             _bookRepository.BookRepositoryChangedHandler += HandleOnBookRepositoryChanged;
-            _dataAPI.UserChanged += HandleOnUserChanged;
+            _dataAPI.User.UserChanged += HandleOnUserChanged;
             _dataAPI.TransactionResult += (int code) => LogicTransactionResult?.Invoke(code);
             _bookRepository.AllBooksUpdated += () => LogicAllBooksUpdated?.Invoke();
 

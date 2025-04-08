@@ -2,10 +2,8 @@
 {
     public abstract class AbstractDataAPI
     {
-        public event EventHandler<UserChangedEventArgs> UserChanged;
         public event Action<int>? TransactionResult;
-
-        public abstract IUser User { get; }
+        public abstract IUserContainer User { get; }
         public abstract IBookRepository BookRepository { get; }
 
         public abstract int CountBooks();

@@ -6,9 +6,9 @@ namespace ClientData
 {
     internal class DataAPI : AbstractDataAPI
     {
-        private IUser _user = null;
+        private IUserContainer _user = null;
 
-        public override IUser User => _user;
+        public override IUserContainer User => _user;
 
         private readonly IBookRepository _bookRepository = new BookRepository();
 
@@ -18,13 +18,13 @@ namespace ClientData
 
         private readonly IConnectionService _connectionService;
 
-        public event EventHandler<UserChangedEventArgs>? UserChanged;
         public event Action<int>? TransactionResult;
 
         public DataAPI(IConnectionService connectionService)
         {
             //_user = new User(userName, initialBalance);
             _bookRepository = new BookRepository();
+            _user = new UserContainer();
             _connectionService = connectionService;
             _connectionService.OnMessage += OnMessage;
 
@@ -42,10 +42,9 @@ namespace ClientData
             if(serializer.GetCommandHeader(message) == UserChangedResponse.StaticHeader)
             {
                 UserChangedResponse response = serializer.Deserialize<UserChangedResponse>(message);
-                if(_user == null || _user.Name == response.User.Username)
+                if(_user.user == null || _user.user.Name == response.User.Username)
                 {
-                    _user = response.User.ToUser();
-                    UserChanged?.Invoke(this, new UserChangedEventArgs(_user));
+                    _user.ChangeUser(response.User.ToUser());
                 }
             }
             else if(serializer.GetCommandHeader(message) == BookChangedResponse.StaticHeader)
@@ -108,7 +107,7 @@ namespace ClientData
         public async Task RequestBuyBook(int bookID)
         {
             Serializer serializer = Serializer.Create();
-            await _connectionService.SendAsync(serializer.Serialize(new SellBookCommand(bookID,_user.Name)));
+            await _connectionService.SendAsync(serializer.Serialize(new SellBookCommand(bookID,_user.user.Name)));
         }
 
         public override void BuyBook(int bookID)

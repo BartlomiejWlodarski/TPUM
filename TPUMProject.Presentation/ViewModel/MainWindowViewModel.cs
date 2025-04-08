@@ -1,12 +1,15 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using TPUMProject.Presentation.Model;
+using ViewModel;
 
 namespace TPUMProject.Presentation.ViewModel
 {
-    public class MainWindowViewModel : BaseViewModel
+    public class MainWindowViewModel : INotifyPropertyChanged
     {
         private ModelAbstractAPI ModelLayer;
         private bool CatalogActive = true;
@@ -66,8 +69,8 @@ namespace TPUMProject.Presentation.ViewModel
 
         private void GetAllBooks()
         {
-            Books.Clear();
-            Books.AddRange(ModelLayer.ModelRepository.GetAllBooks());
+            _booksShow.Clear();
+            _booksShow.AddRange(ModelLayer.ModelRepository.GetAllBooks());
         }
 
         public async Task CloseConnection()
@@ -96,6 +99,7 @@ namespace TPUMProject.Presentation.ViewModel
 
         private void HandleUserChanged(object sender, ModelUserChangedEventArgs e)
         {
+            Debug.WriteLine("User arrived!");
             User = e.user;
         }
 
@@ -142,7 +146,7 @@ namespace TPUMProject.Presentation.ViewModel
                 if (_booksShow != value)
                 {
                     _booksShow = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged("BooksShow");
                 }
             }
         }
@@ -180,6 +184,9 @@ namespace TPUMProject.Presentation.ViewModel
         }
 
         private Visibility _buttonVisibility = Visibility.Visible;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         public Visibility ButtonVisibility
         {
             get => _buttonVisibility;
@@ -206,6 +213,11 @@ namespace TPUMProject.Presentation.ViewModel
                 ShoppingButtonContent = _userList;
                 ButtonVisibility = Visibility.Visible;
             }
+        }
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

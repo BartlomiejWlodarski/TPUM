@@ -40,7 +40,7 @@ namespace TPUMProject.Presentation.Model
     {
         public event EventHandler<ModelBookRepositoryChangedEventArgs>? Changed;
         public event EventHandler<ModelUserChangedEventArgs>? UserChanged;
-        public event Action? ModelAllBooksUpdated;
+        public Action? ModelAllBooksUpdated;
 
         public static ModelAbstractAPI CreateModel(AbstractLogicAPI? logicAPI = default)
         {

@@ -1,32 +1,38 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Threading;
 
-
-namespace TPUMProject.Presentation.ViewModel
+namespace ViewModel
 {
     public class AsyncObservableCollection<T> : ObservableCollection<T>
     {
-        private readonly SynchronizationContext _syncContext;
+        private readonly SynchronizationContext synchronizationContext;
 
         public AsyncObservableCollection()
         {
-            _syncContext = SynchronizationContext.Current;
+            synchronizationContext = SynchronizationContext.Current;
         }
 
-        public AsyncObservableCollection(IEnumerable<T> collection) : base(collection) 
+        public AsyncObservableCollection(IEnumerable<T> list)
+            : base(list)
         {
-             _syncContext = SynchronizationContext.Current;
+            synchronizationContext = SynchronizationContext.Current;
         }
 
-        protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+
+        protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs eventArgs)
         {
-            if(SynchronizationContext.Current == _syncContext)
+            if (SynchronizationContext.Current == synchronizationContext)
             {
-                RaiseCollectionChanged(e);
-            }else
+                // Execute the CollectionChanged event on the current thread
+                RaiseCollectionChanged(eventArgs);
+            }
+            else
             {
-                _syncContext.Send(RaiseCollectionChanged, e);
+                // Raises the CollectionChanged event on the creator thread
+                synchronizationContext.Send(RaiseCollectionChanged, eventArgs);
             }
         }
 
@@ -38,7 +44,7 @@ namespace TPUMProject.Presentation.ViewModel
 
         protected override void OnPropertyChanged(PropertyChangedEventArgs eventArgs)
         {
-            if (SynchronizationContext.Current == _syncContext)
+            if (SynchronizationContext.Current == synchronizationContext)
             {
                 // Execute the PropertyChanged event on the current thread
                 RaisePropertyChanged(eventArgs);
@@ -46,7 +52,7 @@ namespace TPUMProject.Presentation.ViewModel
             else
             {
                 // Raises the PropertyChanged event on the creator thread
-                _syncContext.Send(RaisePropertyChanged, eventArgs);
+                synchronizationContext.Send(RaisePropertyChanged, eventArgs);
             }
         }
 
