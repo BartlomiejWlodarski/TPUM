@@ -1,12 +1,20 @@
 ﻿namespace ClientData.Abstract
 {
-    public interface IBookRepository
+    public interface IBookRepository : IObservable<BookRepositoryChangedEventArgs>
     {
         public event EventHandler<BookRepositoryChangedEventArgs> BookRepositoryChangedHandler;
+        public event Action? AllBooksUpdated;
+
         IEnumerable<IBook> GetAllBooks();
         public abstract int CountBooks();
         bool RemoveBook(int id);
-        void ChangeBookRecommended(IBook book, bool recommended);
+        bool ChangeBook(IBook book);
+
+        bool AddBook(IBook book);
+
+        void LoadAllBooks(IEnumerable<IBook> books);
+
+
     }
 
     public enum BookRepositoryChangedEventType

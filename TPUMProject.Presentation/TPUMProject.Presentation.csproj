@@ -9,11 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TPUMProject.Logic\TPUMProject.ServerLogic.csproj" />
+    <Folder Include="View\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="View\" />
+    <ProjectReference Include="..\ClientLogic\ClientLogic.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
-using TPUMProject.Logic.Abstract;
+using ClientLogic.Abstract;
 
 namespace TPUMProject.Presentation.Model
 {

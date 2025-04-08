@@ -12,7 +12,9 @@ namespace ServerPresentation
     {
         public override T Deserialize<T>(string json)
         {
-            return System.Text.Json.JsonSerializer.Deserialize<T>(json);
+            JsonSerializerOptions options = new JsonSerializerOptions();
+            options.IncludeFields = true;
+            return System.Text.Json.JsonSerializer.Deserialize<T>(json,options);
         }
 
         public override string? GetCommandHeader(string command)
@@ -27,7 +29,9 @@ namespace ServerPresentation
 
         public override string Serialize<T>(T toSerialize)
         {
-            return System.Text.Json.JsonSerializer.Serialize<T>(toSerialize);
+            JsonSerializerOptions options = new JsonSerializerOptions();
+            options.IncludeFields = true;
+            return System.Text.Json.JsonSerializer.Serialize<T>(toSerialize, options);
         }
     }
 }

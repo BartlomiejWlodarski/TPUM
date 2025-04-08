@@ -1,6 +1,7 @@
 ﻿using ClinetAPI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
@@ -37,7 +38,7 @@ namespace ClientData
                 this.clientWebSocket = clientWebSocket;
                 this.log = log;
                 this.uri = uri;
-
+                Task.Factory.StartNew(ClientMessageLoop);
             }
 
             public override Task DisconnectAsync()
@@ -59,7 +60,7 @@ namespace ClientData
             {
                 try
                 {
-                    byte[] buffer = new byte[1024];
+                    byte[] buffer = new byte[4096];
                     while (true)
                     {
                         ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
@@ -92,6 +93,7 @@ namespace ClientData
                 catch (Exception ex)
                 {
                     log("Connection interrupted by exception: " + ex);
+                    Debug.WriteLine(ex);
                     clientWebSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, "Connection interrupted by exception", CancellationToken.None).Wait();
                 }
             }

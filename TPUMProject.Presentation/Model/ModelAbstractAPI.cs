@@ -1,4 +1,4 @@
-﻿using TPUMProject.Logic.Abstract;
+﻿using ClientLogic.Abstract;
 
 namespace TPUMProject.Presentation.Model
 {
@@ -40,16 +40,19 @@ namespace TPUMProject.Presentation.Model
     {
         public event EventHandler<ModelBookRepositoryChangedEventArgs>? Changed;
         public event EventHandler<ModelUserChangedEventArgs>? UserChanged;
+        public Action? ModelAllBooksUpdated;
 
         public static ModelAbstractAPI CreateModel(AbstractLogicAPI? logicAPI = default)
         {
-            return new ModelLayer(logicAPI ?? AbstractLogicAPI.Create("Marcin",100));
+            return new ModelLayer(logicAPI ?? AbstractLogicAPI.Create());
         }
 
-        public abstract bool BuyBook(int id);
+        public abstract void BuyBook(int id);
+        public abstract void GetUser(string username);
+        public abstract void GetBooks();
 
         public IModelBookRepository ModelRepository;
-        public IModelUser User;
+        public IModelConnectionService ConnectionService;
 
         internal class ModelLayer : ModelAbstractAPI {
 
@@ -61,12 +64,23 @@ namespace TPUMProject.Presentation.Model
                 _logicLayer.BookService.BookRepositoryChanged += HandleBookRepositoryChanged;
                 _logicLayer.BookService.UserChanged += HandleUserChanged;
                 ModelRepository = new ModelBookRepository(_logicLayer.BookService);
-                //User = new ModelUser(_logicLayer.GetUser());
+                ConnectionService = new ModelConnectionService(_logicLayer.GetConnectionService());
+                _logicLayer.BookService.LogicAllBooksUpdated += () => ModelAllBooksUpdated?.Invoke();
             }
 
-            public override bool BuyBook(int id)
+            public override void BuyBook(int id)
             {
-                return _logicLayer.BookService.BuyBook(id);
+                _logicLayer.BookService.BuyBook(id);
+            }
+
+            public override void GetBooks()
+            {
+                _logicLayer.BookService.GetBooks();
+            }
+
+            public override void GetUser(string username)
+            {
+                _logicLayer.BookService.GetUser(username);
             }
 
             private void HandleBookRepositoryChanged(object sender, LogicBookRepositoryChangedEventArgs e)

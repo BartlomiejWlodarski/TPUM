@@ -87,7 +87,6 @@ namespace TPUMProject.Logic
                     {
                         recommendedID = books[i].Id;
                         _bookRepository.ChangeBookRecommended(books[i], false);
-                        BookRepositoryChanged?.Invoke(this, new LogicBookRepositoryChangedEventArgs(books[i], BookRepositoryChangedEventType.Modified));
                         break;
                     }
                 }
@@ -108,7 +107,6 @@ namespace TPUMProject.Logic
                     if (books[i].Id == newRecommended.Id)
                     {
                         _bookRepository.ChangeBookRecommended(books[i], true);
-                        BookRepositoryChanged?.Invoke(this, new LogicBookRepositoryChangedEventArgs(books[i], BookRepositoryChangedEventType.Modified));
                         break;
                     }
                 }

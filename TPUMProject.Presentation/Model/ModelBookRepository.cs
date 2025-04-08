@@ -1,4 +1,4 @@
-﻿using TPUMProject.Logic.Abstract;
+﻿using ClientLogic.Abstract;
 
 namespace TPUMProject.Presentation.Model
 {
