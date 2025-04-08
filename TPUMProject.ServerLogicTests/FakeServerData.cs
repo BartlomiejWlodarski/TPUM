@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TPUMProject.Data.Abstract;
+﻿using TPUMProject.Data.Abstract;
 
-namespace TPUMProject.Tests
+namespace TPUMProject.ServerLogicTests
 {
     internal class FakeDataAPI : AbstractDataAPI
     {
-        private readonly IUser _user;
+        private readonly List<IUser> _users;
 
-        public override IUser User => _user;
+        public override IEnumerable<IUser> Users => _users;
 
         private readonly IBookRepository _bookRepository = new FakeBookRepository();
 
@@ -19,9 +14,10 @@ namespace TPUMProject.Tests
 
         private int _nextBookId = 0;
 
-        public FakeDataAPI(string userName, decimal initialBalance)
+        public FakeDataAPI()
         {
-            _user = new FakeUser(userName, initialBalance);
+            _users = new List<IUser>();
+            _users.Add(new FakeUser("Marcin", 50));
             _bookRepository = new FakeBookRepository();
         }
 
