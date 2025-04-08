@@ -16,13 +16,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerPresentation", "ServerPresentation\ServerPresentation.csproj", "{2B8D4BBF-C673-4BFF-9B96-B3B9B377E69E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerPresentation", "ServerPresentation\ServerPresentation.csproj", "{2B8D4BBF-C673-4BFF-9B96-B3B9B377E69E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientData", "ClientData\ClientData.csproj", "{E518ECD3-1D5C-4E5E-A662-4EE6317665AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientData", "ClientData\ClientData.csproj", "{E518ECD3-1D5C-4E5E-A662-4EE6317665AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientLogic", "ClientLogic\ClientLogic.csproj", "{9FCB84A4-9EF5-418F-B9A5-5788068C71E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientLogic", "ClientLogic\ClientLogic.csproj", "{9FCB84A4-9EF5-418F-B9A5-5788068C71E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClinetAPI", "ClinetAPI\ClinetAPI.csproj", "{8DB450BF-3DC8-48F5-BDA1-693F278F498B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClinetAPI", "ClinetAPI\ClinetAPI.csproj", "{8DB450BF-3DC8-48F5-BDA1-693F278F498B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPUMProject.ClientDataTests", "TPUMProject.ClientDataTests\TPUMProject.ClientDataTests.csproj", "{BD11D8C0-A74C-409A-B98F-A1E12A792AA4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPUMProject.ClientLogicTests", "TPUMProject.ClientLogicTests\TPUMProject.ClientLogicTests.csproj", "{5A4B897E-F448-4DBE-B610-51DF68BC7EC1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPUMProject.ServerDataTests", "TPUMProject.ServerDataTests\TPUMProject.ServerDataTests.csproj", "{CE8874A5-75C5-4B53-B55D-DE17958344B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPUMProject.ServerLogicTests", "TPUMProject.ServerLogicTests\TPUMProject.ServerLogicTests.csproj", "{7C63BB68-5974-4B16-8CB8-59DF4EB32113}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,6 +70,22 @@ Global
 		{8DB450BF-3DC8-48F5-BDA1-693F278F498B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8DB450BF-3DC8-48F5-BDA1-693F278F498B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8DB450BF-3DC8-48F5-BDA1-693F278F498B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD11D8C0-A74C-409A-B98F-A1E12A792AA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD11D8C0-A74C-409A-B98F-A1E12A792AA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD11D8C0-A74C-409A-B98F-A1E12A792AA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD11D8C0-A74C-409A-B98F-A1E12A792AA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A4B897E-F448-4DBE-B610-51DF68BC7EC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A4B897E-F448-4DBE-B610-51DF68BC7EC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A4B897E-F448-4DBE-B610-51DF68BC7EC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A4B897E-F448-4DBE-B610-51DF68BC7EC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE8874A5-75C5-4B53-B55D-DE17958344B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE8874A5-75C5-4B53-B55D-DE17958344B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE8874A5-75C5-4B53-B55D-DE17958344B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE8874A5-75C5-4B53-B55D-DE17958344B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C63BB68-5974-4B16-8CB8-59DF4EB32113}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C63BB68-5974-4B16-8CB8-59DF4EB32113}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C63BB68-5974-4B16-8CB8-59DF4EB32113}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C63BB68-5974-4B16-8CB8-59DF4EB32113}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
