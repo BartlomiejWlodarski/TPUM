@@ -2,8 +2,6 @@
 {
     public interface IUser
     {
-        public event EventHandler<UserChangedEventArgs> UserChanged;
-
         string Name { get; }
         decimal Balance { get; set; }
         IEnumerable<IBook> PurchasedBooks { get; }

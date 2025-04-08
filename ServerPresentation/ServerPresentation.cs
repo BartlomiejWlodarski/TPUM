@@ -13,6 +13,8 @@ namespace ServerPresentation
         private readonly AbstractLogicAPI logicAPI;
         private WebSocketConnection? connection;
 
+        object connectionLock = new object();
+
         private ServerPresentation(AbstractLogicAPI logicAPI)
         {
             this.logicAPI = logicAPI;
@@ -63,12 +65,12 @@ namespace ServerPresentation
             else if(serializer.GetCommandHeader(message) == GetBooksCommand.StaticHeader)
             {
                 GetBooksCommand sellBook = serializer.Deserialize<GetBooksCommand>(message);
-                Task taks = Task.Run(async () => await SendBooks());
+                await SendBooks();
             }
             else if(serializer.GetCommandHeader(message) == GetUserCommand.StaticHeader)
             {
                 GetUserCommand userCommand = serializer.Deserialize<GetUserCommand>(message);
-
+                await SendUser(userCommand.Username);
             }
         }
 
@@ -146,6 +148,12 @@ namespace ServerPresentation
         private void OnError()
         {
             Console.WriteLine("Error!");
+        }
+
+        private static async Task Main(string[] args)
+        {
+            ServerPresentation serverPresentation = new ServerPresentation(AbstractLogicAPI.Create());
+            await serverPresentation.StartConnection();
         }
 
     }

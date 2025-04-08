@@ -20,5 +20,6 @@ namespace ClientData
             IUser resultUser = new User(user.Username, user.Balance);
             resultUser.SetPurchasedBooks(user.Books.Select(x => x.ToBook()));
             return resultUser;
+        }
     }
 }

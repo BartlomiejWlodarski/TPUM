@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using TPUMProject.Presentation.Model;
@@ -42,18 +43,55 @@ namespace TPUMProject.Presentation.ViewModel
         public MainWindowViewModel() : this(null)
         { }
 
-        internal MainWindowViewModel(ModelAbstractAPI modelLayerAPI)
+        public MainWindowViewModel(ModelAbstractAPI modelLayerAPI)
         {
             ModelLayer = modelLayerAPI == null ? ModelAbstractAPI.CreateModel() : modelLayerAPI;
+            ModelLayer.ConnectionService.OnConnectionStateChanged += OnConnectionStateChange;
+            ModelLayer.ConnectionService.OnError += OnConnectionStateChange;
+
             ModelLayer.Changed += HandleBookRepositoryChanged;
             ModelLayer.UserChanged += HandleUserChanged;
+            ModelLayer.ModelAllBooksUpdated += GetAllBooks;
 
-            Books = new ObservableCollection<IModelBook>(ModelLayer.ModelRepository.GetAllBooks());
-            User = ModelLayer.User;
+
+            OnConnectionStateChange();
+
+            Books = new AsyncObservableCollection<IModelBook>(ModelLayer.ModelRepository.GetAllBooks());
             BooksShow = Books;
-            
+            //User = ModelLayer.User;
+
             Buy = new RelayCommand(() => RelayBuy());
             ChangeList = new RelayCommand(() => RelayChangeList());
+        }
+
+        private void GetAllBooks()
+        {
+            Books.Clear();
+            Books.AddRange(ModelLayer.ModelRepository.GetAllBooks());
+        }
+
+        public async Task CloseConnection()
+        {
+            if (ModelLayer.ConnectionService.IsConnected())
+            {
+                await ModelLayer.ConnectionService.Disconnect();
+            }
+        }
+
+        private void OnConnectionStateChange()
+        {
+            bool connectionState = ModelLayer.ConnectionService.IsConnected();
+            ConnectionStateString = connectionState ? "Connected" : "Disconnected";
+
+            if (connectionState)
+            {
+                ModelLayer.GetUser("Marcin");
+                ModelLayer.GetBooks();
+            }
+            else
+            {
+                Task.Run(() => ModelLayer.ConnectionService.Connect(new Uri("ws://localhost:42069/")));
+            }
         }
 
         private void HandleUserChanged(object sender, ModelUserChangedEventArgs e)
@@ -74,13 +112,16 @@ namespace TPUMProject.Presentation.ViewModel
                     break;
                 
                 case 2:
-                    Books[Books.IndexOf(Books.Where(book => book.Id == e.AffectedBook.Id).Single())] = e.AffectedBook; // Modified
+                    if (Books.Count == 0) return;
+                    int index = Books.IndexOf(Books.Where(book => book.Id == e.AffectedBook.Id).Single());
+                    if (index < 0 || index >= Books.Count) return;
+                    Books[index] = e.AffectedBook; // Modified
                         break;
             }
         }
 
-        private ObservableCollection<IModelBook> books;
-        public ObservableCollection<IModelBook> Books 
+        private AsyncObservableCollection<IModelBook> books;
+        public AsyncObservableCollection<IModelBook> Books 
         { 
             get => books;
             private set
@@ -92,8 +133,8 @@ namespace TPUMProject.Presentation.ViewModel
                 }
             }
         }
-        private ObservableCollection<IModelBook> _booksShow;
-        public ObservableCollection<IModelBook> BooksShow
+        private AsyncObservableCollection<IModelBook> _booksShow;
+        public AsyncObservableCollection<IModelBook> BooksShow
         {
             get => _booksShow;
             private set
@@ -101,6 +142,21 @@ namespace TPUMProject.Presentation.ViewModel
                 if (_booksShow != value)
                 {
                     _booksShow = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private string _connectionStateString;
+
+        public string ConnectionStateString
+        {
+            get => _connectionStateString;
+            set
+            {
+                if(value != _connectionStateString)
+                {
+                    _connectionStateString = value;
                     OnPropertyChanged();
                 }
             }
@@ -139,7 +195,7 @@ namespace TPUMProject.Presentation.ViewModel
             if(CatalogActive)
             {
                 CatalogActive = false;
-                BooksShow = new ObservableCollection<IModelBook>(User.PurchasedBooks);
+                BooksShow = new AsyncObservableCollection<IModelBook>(User.PurchasedBooks);
                 ShoppingButtonContent = _shopList;
                 ButtonVisibility = Visibility.Hidden;
             } 

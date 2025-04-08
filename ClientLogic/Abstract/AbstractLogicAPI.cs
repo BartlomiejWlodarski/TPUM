@@ -7,9 +7,9 @@ namespace ClientLogic.Abstract
         public abstract IBookService BookService { get; }
         public abstract IUser User { get; }
 
-        public static AbstractLogicAPI Create(string userName, decimal initialBalance)
+        public static AbstractLogicAPI Create()
         {
-            AbstractDataAPI dataAPI = AbstractDataAPI.Create(userName, initialBalance);
+            AbstractDataAPI dataAPI = AbstractDataAPI.Create(null);
             return new LogicAPI(dataAPI);
         }
 
@@ -19,5 +19,7 @@ namespace ClientLogic.Abstract
         }
 
         public abstract ILogicUser GetUser();
+
+        public abstract ILogicConnectionService GetConnectionService();
     }
 }

@@ -22,5 +22,11 @@ namespace TPUMProject.Presentation
         {
             InitializeComponent();
         }
+
+        private async void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            MainWindowViewModel windowViewModel = (MainWindowViewModel)DataContext;
+            await windowViewModel.CloseConnection();
+        }
     }
 }

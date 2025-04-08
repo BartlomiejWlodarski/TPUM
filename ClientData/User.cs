@@ -7,9 +7,6 @@ namespace ClientData
         public string Name { get; }
         public decimal Balance { get; set; }
         private List<IBook> _purchasedBooks;
-
-        public event EventHandler<UserChangedEventArgs>? UserChanged;
-
         public User(string name, decimal initialBalance)
         {
             Name = name;
@@ -29,7 +26,6 @@ namespace ClientData
             if (book != null)
             {
                 _purchasedBooks.Add(book);
-                UserChanged?.Invoke(this, new UserChangedEventArgs(this));
             }
         }
     }

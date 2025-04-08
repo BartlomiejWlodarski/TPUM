@@ -41,7 +41,7 @@ namespace ClinetAPI
     {
         public static string StaticHeader = "GetUser";
 
-        string Username;
+        public string Username;
 
         public GetUserCommand(string username) : base(StaticHeader)
         {
@@ -112,6 +112,7 @@ namespace ClinetAPI
         public BookDTO book;
         public int changeType;
 
+        public BookChangedResponse() : base(StaticHeader) { }
         public BookChangedResponse(int change) : base(StaticHeader) { changeType = change; }
     }
 

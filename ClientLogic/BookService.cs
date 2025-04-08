@@ -3,13 +3,17 @@ using ClientLogic.Abstract;
 
 namespace ClientLogic
 {
-    internal class BookService : IBookService
+    internal class BookService : IBookService, IObserver<BookRepositoryChangedEventArgs>
     {
         private readonly IBookRepository _bookRepository;
         private readonly AbstractDataAPI _dataAPI;
 
         public event EventHandler<LogicBookRepositoryChangedEventArgs>? BookRepositoryChanged;
         public event EventHandler<LogicUserChangedEventArgs> UserChanged;
+        public event Action<int>? LogicTransactionResult;
+        public event Action? LogicAllBooksUpdated;
+
+        private IDisposable BookRepoHandle;
 
         private object booksLock = new object();
 
@@ -28,28 +32,46 @@ namespace ClientLogic
             _dataAPI = dataAPI;
             _bookRepository = dataAPI.BookRepository;
             _bookRepository.BookRepositoryChangedHandler += HandleOnBookRepositoryChanged;
-            _dataAPI.User.UserChanged += HandleOnUserChanged;
+            _dataAPI.UserChanged += HandleOnUserChanged;
+            _dataAPI.TransactionResult += (int code) => LogicTransactionResult?.Invoke(code);
+            _bookRepository.AllBooksUpdated += () => LogicAllBooksUpdated?.Invoke();
+
+            BookRepoHandle = _bookRepository.Subscribe(this);
         }
 
         public IEnumerable<ILogicBook> GetAvailableBooks() => _bookRepository.GetAllBooks().Select(book => new LogicBook(book));
 
-        public bool BuyBook(int id)
+        public void BuyBook(int id)
         {
             lock (booksLock)
             {
-                IBook book = _dataAPI.BookRepository.GetAllBooks().FirstOrDefault(b => b.Id == id);
-                if (book == null || _dataAPI.User.Balance < book.Price)
-                    return false;
-
-                if(book.Recommended)
-                {
-                    _bookRepository.ChangeBookRecommended(book, false);
-                }
-
-                _dataAPI.User.Balance -= book.Price;
-                _dataAPI.User.AddPurchasedBook(book);
-                return _dataAPI.BookRepository.RemoveBook(id);
+                _dataAPI?.BuyBook(id);
             }
+        }
+
+        public void OnCompleted()
+        {
+            BookRepoHandle.Dispose();
+        }
+
+        public void OnError(Exception error)
+        {
+            
+        }
+
+        public void OnNext(BookRepositoryChangedEventArgs value)
+        {
+            BookRepositoryChanged?.Invoke(this,new LogicBookRepositoryChangedEventArgs(value));
+        }
+
+        public void GetUser(string userName)
+        {
+            _dataAPI.GetUser(userName);
+        }
+
+        public void GetBooks()
+        {
+            _dataAPI.RequestBooks();
         }
     }
 }

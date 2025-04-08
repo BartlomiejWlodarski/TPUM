@@ -10,7 +10,7 @@ namespace ServerPresentation
         public static async Task StartServer(int port, Action<WebSocketConnection> onConnetion)
         {
             Uri uri = new Uri($@"http://localhost:{port}/");
-            
+            await ServerLoop(uri, onConnetion);
         }
 
         private static async Task ServerLoop(Uri uri, Action<WebSocketConnection> onConnection)
