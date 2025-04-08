@@ -14,16 +14,16 @@ namespace TPUMProject.Tests
         [TestMethod]
         public void BuyIntegrationTest()
         {
-            AbstractDataAPI dataAPI = AbstractDataAPI.Create("testUser", 40);
+            AbstractDataAPI dataAPI = AbstractDataAPI.Create();
             AbstractLogicAPI logicAPI = AbstractLogicAPI.Create(dataAPI);
 
             Assert.AreEqual(3, logicAPI.BookService.GetAvailableBooks().Count());
 
-            Assert.AreEqual(true, logicAPI.BookService.BuyBook(1));
+            Assert.AreEqual(0, logicAPI.BookService.BuyBook(1, "Marcin"));
 
-            Assert.AreEqual(logicAPI.User.Balance, dataAPI.User.Balance);
+            Assert.AreEqual(logicAPI.GetUser("Marcin").Balance, dataAPI.Users.First().Balance);
 
-            Assert.AreEqual(false, logicAPI.BookService.BuyBook(2));
+            Assert.AreEqual(2, logicAPI.BookService.BuyBook(1, "Marcin"));
         }
     }
 }
