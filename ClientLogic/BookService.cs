@@ -9,9 +9,10 @@ namespace ClientLogic
         private readonly AbstractDataAPI _dataAPI;
 
         public event EventHandler<LogicBookRepositoryChangedEventArgs>? BookRepositoryChanged;
-        public event EventHandler<LogicUserChangedEventArgs> UserChanged;
+        public event EventHandler<LogicUserChangedEventArgs>? UserChanged;
         public event Action<int>? LogicTransactionResult;
         public event Action? LogicAllBooksUpdated;
+        public event EventHandler<LogicBookRepositoryReplacedEventArgs>? BookRepositoryReplaced;
 
         private IDisposable BookRepoHandle;
 
@@ -27,12 +28,18 @@ namespace ClientLogic
             UserChanged?.Invoke(this, new LogicUserChangedEventArgs(e));
         }
 
+        private void HandleOnBookRepositoryReplaced(object sender, BookRepositoryReplacedEventArgs e)
+        {
+            BookRepositoryReplaced?.Invoke(this,new LogicBookRepositoryReplacedEventArgs(e));
+        }
+
         public BookService(AbstractDataAPI dataAPI)
         {
             _dataAPI = dataAPI;
             _bookRepository = dataAPI.BookRepository;
             _bookRepository.BookRepositoryChangedHandler += HandleOnBookRepositoryChanged;
             _dataAPI.User.UserChanged += HandleOnUserChanged;
+            _bookRepository.BookRepositoryReplacedHandler += HandleOnBookRepositoryReplaced;
             _dataAPI.TransactionResult += (int code) => LogicTransactionResult?.Invoke(code);
             _bookRepository.AllBooksUpdated += () => LogicAllBooksUpdated?.Invoke();
 

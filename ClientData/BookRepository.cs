@@ -9,6 +9,9 @@ namespace ClientData
 
         public event EventHandler<BookRepositoryChangedEventArgs>? BookRepositoryChangedHandler;
         public event Action? AllBooksUpdated;
+        public event EventHandler<BookRepositoryReplacedEventArgs>? BookRepositoryReplacedHandler;
+
+
         private HashSet<IObserver<BookRepositoryChangedEventArgs>> observers = new HashSet<IObserver<BookRepositoryChangedEventArgs>>();
 
         private object bookLock = new object();
@@ -72,7 +75,8 @@ namespace ClientData
             {
                 _books.Clear();
                 _books.AddRange(books);
-                AllBooksUpdated?.Invoke();
+                BookRepositoryReplacedHandler?.Invoke(this,new BookRepositoryReplacedEventArgs(books));
+                //AllBooksUpdated?.Invoke();
             }
         }
 

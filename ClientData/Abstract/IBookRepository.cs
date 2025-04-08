@@ -4,6 +4,7 @@
     {
         public event EventHandler<BookRepositoryChangedEventArgs> BookRepositoryChangedHandler;
         public event Action? AllBooksUpdated;
+        public event EventHandler<BookRepositoryReplacedEventArgs> BookRepositoryReplacedHandler;
 
         IEnumerable<IBook> GetAllBooks();
         public abstract int CountBooks();
@@ -32,6 +33,16 @@
         {
             this.bookAffected = bookAffected;
             this.EventType = changeType;
+        }
+    }
+
+    public class BookRepositoryReplacedEventArgs : EventArgs
+    {
+        public IEnumerable<IBook> booksAffected;
+
+        public BookRepositoryReplacedEventArgs(IEnumerable<IBook> books)
+        {
+            this.booksAffected = books;
         }
     }
 }

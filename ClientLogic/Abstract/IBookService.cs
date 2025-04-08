@@ -6,6 +6,7 @@ namespace ClientLogic.Abstract
     {
         public event EventHandler<LogicBookRepositoryChangedEventArgs> BookRepositoryChanged;
         public event EventHandler<LogicUserChangedEventArgs> UserChanged;
+        public event EventHandler<LogicBookRepositoryReplacedEventArgs> BookRepositoryReplaced;
         public event Action<int>? LogicTransactionResult;
         public event Action? LogicAllBooksUpdated;
 
@@ -48,5 +49,14 @@ namespace ClientLogic.Abstract
         {
             this.user = new LogicUser(e.user);
         }
+    }
+
+    public class LogicBookRepositoryReplacedEventArgs : EventArgs
+    {
+        public IEnumerable<ILogicBook> BooksReplaced;
+
+        public LogicBookRepositoryReplacedEventArgs(IEnumerable<ILogicBook> booksReplaced) { BooksReplaced = booksReplaced; }
+
+        public LogicBookRepositoryReplacedEventArgs(BookRepositoryReplacedEventArgs bookRepositoryReplacedEventArgs) { BooksReplaced = bookRepositoryReplacedEventArgs.booksAffected.Select(x => new LogicBook(x)); }
     }
 }

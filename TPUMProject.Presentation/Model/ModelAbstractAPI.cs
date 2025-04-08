@@ -2,6 +2,19 @@
 
 namespace TPUMProject.Presentation.Model
 {
+    public class ModelBookRepositoryReplacedEventArgs : EventArgs
+    {
+        public IEnumerable<IModelBook> modelBooks;
+
+        public ModelBookRepositoryReplacedEventArgs(IEnumerable<IModelBook> modelBooks)
+        {
+            this.modelBooks = modelBooks;
+        }
+
+        public ModelBookRepositoryReplacedEventArgs(LogicBookRepositoryReplacedEventArgs e) { modelBooks = e.BooksReplaced.Select(x =>new ModelBook(x)); }
+
+    }
+
 
     public class ModelBookRepositoryChangedEventArgs : EventArgs
     {
@@ -41,6 +54,7 @@ namespace TPUMProject.Presentation.Model
         public event EventHandler<ModelBookRepositoryChangedEventArgs>? Changed;
         public event EventHandler<ModelUserChangedEventArgs>? UserChanged;
         public Action? ModelAllBooksUpdated;
+        public event EventHandler<ModelBookRepositoryReplacedEventArgs>? ModelBookRepositoryReplaced;
 
         public static ModelAbstractAPI CreateModel(AbstractLogicAPI? logicAPI = default)
         {
@@ -63,6 +77,7 @@ namespace TPUMProject.Presentation.Model
                 _logicLayer = logicLayer;
                 _logicLayer.BookService.BookRepositoryChanged += HandleBookRepositoryChanged;
                 _logicLayer.BookService.UserChanged += HandleUserChanged;
+                _logicLayer.BookService.BookRepositoryReplaced += HandleBookRepositoryReplaced;
                 ModelRepository = new ModelBookRepository(_logicLayer.BookService);
                 ConnectionService = new ModelConnectionService(_logicLayer.GetConnectionService());
                 _logicLayer.BookService.LogicAllBooksUpdated += () => ModelAllBooksUpdated?.Invoke();
@@ -91,6 +106,11 @@ namespace TPUMProject.Presentation.Model
             private void HandleUserChanged(object sender, LogicUserChangedEventArgs e)
             {
                 UserChanged?.Invoke(this, new ModelUserChangedEventArgs(e));
+            }
+
+            private void HandleBookRepositoryReplaced(object sender, LogicBookRepositoryReplacedEventArgs e)
+            {
+                ModelBookRepositoryReplaced?.Invoke(this,new ModelBookRepositoryReplacedEventArgs(e));
             }
         }
     }

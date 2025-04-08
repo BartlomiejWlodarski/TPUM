@@ -54,6 +54,7 @@ namespace TPUMProject.Presentation.ViewModel
 
             ModelLayer.Changed += HandleBookRepositoryChanged;
             ModelLayer.UserChanged += HandleUserChanged;
+            ModelLayer.ModelBookRepositoryReplaced += HandleBookRepositoryReplaced;
             ModelLayer.ModelAllBooksUpdated += GetAllBooks;
 
 
@@ -69,8 +70,8 @@ namespace TPUMProject.Presentation.ViewModel
 
         private void GetAllBooks()
         {
-            _booksShow.Clear();
-            _booksShow.AddRange(ModelLayer.ModelRepository.GetAllBooks());
+            //_booksShow.Clear();
+            //_booksShow.AddRange(ModelLayer.ModelRepository.GetAllBooks());
         }
 
         public async Task CloseConnection()
@@ -95,6 +96,12 @@ namespace TPUMProject.Presentation.ViewModel
             {
                 Task.Run(() => ModelLayer.ConnectionService.Connect(new Uri("ws://localhost:42069/")));
             }
+        }
+
+        private void HandleBookRepositoryReplaced(object sender, ModelBookRepositoryReplacedEventArgs e)
+        {
+            //books.Clear();
+            //Books.AddRange(e.modelBooks);
         }
 
         private void HandleUserChanged(object sender, ModelUserChangedEventArgs e)
