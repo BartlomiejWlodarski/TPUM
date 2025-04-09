@@ -34,7 +34,7 @@ namespace TPUMProject.ClientDataTests
             ];
 
             connectionService.MockUpdateAllBooks(bookDTOs);
-            List<IBook> books = (List<IBook>)data.BookRepository.GetAllBooks();
+            List<IBook> books = (List<IBook>)data.GetBookRepository().GetAllBooks();
 
             for (int i = 0; i < bookDTOs.Length; i++)
             {
@@ -48,7 +48,17 @@ namespace TPUMProject.ClientDataTests
         }
 
         [TestMethod]
-        public void BuyBookTest()
+        public void GetItemsTest()
+        {
+            Assert.AreEqual(data.GetBookRepository().GetAllBooks().Count(), 0);
+
+            PrepareData();
+
+            Assert.AreEqual(data.GetBookRepository().GetAllBooks().Count(), 2);
+        }
+
+        [TestMethod]
+        public async Task BuyBookTest()
         {
             connectionService.MockUpdateAllBooks([
                 new BookDTO(7, "TestTitle", "TestAuthor", 20, false, 1),
@@ -60,19 +70,12 @@ namespace TPUMProject.ClientDataTests
             connectionService.MockUpdateUser(
                 new UserDTO("Marcin", 50, [new BookDTO(6, "TestTitle3", "TestAuthor3", 10, false, 1)])
                 );
-            data.BuyBook(7);
-            //Task.Delay(1000).Wait();
 
-            //Assert.AreEqual(7, connectionService.lastBoughtId);
+            await data.GetBookRepository().SellBook(7, "Marcin");
+
+            Assert.AreEqual(7, connectionService.lastBoughtId);
         }
 
-        [TestMethod]
-        public void GetItemsTest()
-        {
-            PrepareData();
-
-            Assert.AreEqual(data.BookRepository.CountBooks(), 2);
-            Assert.AreEqual(data.BookRepository.GetAllBooks().Count(), 2);
-        }
+        
     }
 }
