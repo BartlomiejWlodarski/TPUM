@@ -18,6 +18,7 @@ namespace ClinetAPI
         }
 
         public abstract Task DisconnectAsync();
-        protected abstract Task SendTask(string message);   
+
+        protected abstract Task SendTask(string message);
     }
 }

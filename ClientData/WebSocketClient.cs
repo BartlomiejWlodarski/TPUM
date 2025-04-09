@@ -11,19 +11,19 @@ namespace ClientData
 {
     internal class WebSocketClient
     {
-        public static async Task<WebSocketConnection> Connect(Uri uri, Action<string>? logger)
+        public static async Task<WebSocketConnection> Connect(Uri peer, Action<string>? logger)
         {
             ClientWebSocket clientWebSocket = new ClientWebSocket();
-            await clientWebSocket.ConnectAsync(uri, CancellationToken.None);
+            await clientWebSocket.ConnectAsync(peer, CancellationToken.None);
             switch (clientWebSocket.State)
             {
                 case WebSocketState.Open:
-                    logger?.Invoke("Opening socket connection to server" + uri);
-                    WebSocketConnection connection = new ClientWebSocketConnection(clientWebSocket,logger,uri);
-                    return connection;
+                    logger?.Invoke($"Opening WebSocket connection to remote server {peer}");
+                    WebSocketConnection socket = new ClientWebSocketConnection(clientWebSocket, peer, logger);
+                    return socket;
                 default:
-                    logger?.Invoke("Connecting to server failed. " + clientWebSocket.State);
-                    throw new WebSocketException("Connecting to server failed." + clientWebSocket.State);
+                    logger?.Invoke($"Cannot connect to remote node status {clientWebSocket.State}");
+                    throw new WebSocketException($"Cannot connect to remote node status {clientWebSocket.State}");
             }
         }
 
@@ -31,19 +31,14 @@ namespace ClientData
         {
             private readonly ClientWebSocket clientWebSocket;
             private readonly Action<string> log;
-            private readonly Uri uri;
+            private readonly Uri peer;
 
-            public ClientWebSocketConnection(ClientWebSocket clientWebSocket, Action<string> log, Uri uri)
+            public ClientWebSocketConnection(ClientWebSocket clientWebSocket, Uri peer, Action<string> log)
             {
                 this.clientWebSocket = clientWebSocket;
+                this.peer = peer;
                 this.log = log;
-                this.uri = uri;
                 Task.Factory.StartNew(ClientMessageLoop);
-            }
-
-            public override Task DisconnectAsync()
-            {
-                return clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure,"Shutting down the connection",CancellationToken.None);
             }
 
             protected override Task SendTask(string message)
@@ -51,9 +46,14 @@ namespace ClientData
                 return clientWebSocket.SendAsync(message.ToArraySegment(), WebSocketMessageType.Text, true, CancellationToken.None);
             }
 
+            public override Task DisconnectAsync()
+            {
+                return clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Shutdown procedure started", CancellationToken.None);
+            }
+
             public override string ToString()
             {
-                return uri.ToString();
+                return peer.ToString();
             }
 
             private void ClientMessageLoop()
@@ -65,20 +65,22 @@ namespace ClientData
                     {
                         ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
                         WebSocketReceiveResult result = clientWebSocket.ReceiveAsync(segment, CancellationToken.None).Result;
-                        if(result.MessageType == WebSocketMessageType.Close)
+                        if (result.MessageType == WebSocketMessageType.Close)
                         {
                             OnClose?.Invoke();
-                            clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing web socket", CancellationToken.None).Wait();
+                            clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "I am closing", CancellationToken.None).Wait();
                             return;
                         }
 
                         int count = result.Count;
                         while (!result.EndOfMessage)
                         {
-                            if(count >= buffer.Length)
+                            if (count >= buffer.Length)
                             {
                                 OnClose?.Invoke();
-                                clientWebSocket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "Closing web socket. Buffer size exceeded!", CancellationToken.None).Wait();
+                                clientWebSocket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "That's too long",
+                                        CancellationToken.None)
+                                    .Wait();
                                 return;
                             }
 
@@ -86,18 +88,19 @@ namespace ClientData
                             result = clientWebSocket.ReceiveAsync(segment, CancellationToken.None).Result;
                             count += result.Count;
                         }
+
                         string message = Encoding.UTF8.GetString(buffer, 0, count);
                         OnMessage?.Invoke(message);
                     }
                 }
                 catch (Exception ex)
                 {
-                    log("Connection interrupted by exception: " + ex);
-                    Debug.WriteLine(ex);
-                    clientWebSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, "Connection interrupted by exception", CancellationToken.None).Wait();
+                    log($"Connection has been broken because of an exception {ex}");
+                    clientWebSocket.CloseAsync(WebSocketCloseStatus.InternalServerError,
+                        "Connection has been broken because of an exception",
+                        CancellationToken.None).Wait();
                 }
             }
-
         }
     }
 }

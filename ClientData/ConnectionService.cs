@@ -17,28 +17,30 @@ namespace ClientData
         public event Action? OnError;
         public event Action? OnDisconnect;
 
-        internal WebSocketConnection? WebSocketConnection {  get; private set; }
-        public async Task Connect(Uri uri)
+        internal WebSocketConnection? WebSocketConnection { get; private set; }
+        public async Task Connect(Uri peerUri)
         {
             try
             {
-                Logger?.Invoke("Connecting to " + uri);
-                WebSocketConnection = await WebSocketClient.Connect(uri,Logger);
+                Logger?.Invoke($"Connecting to {peerUri}");
+                WebSocketConnection = await WebSocketClient.Connect(peerUri, Logger);
                 OnConnectStateChanged?.Invoke();
                 WebSocketConnection.OnMessage = (message) => OnMessage?.Invoke(message);
-                WebSocketConnection.OnClose = () => OnDisconnect?.Invoke();
                 WebSocketConnection.OnError = () => OnError?.Invoke();
+                WebSocketConnection.OnClose = () => OnDisconnect?.Invoke();
             }
-            catch(WebSocketException ex) 
+            catch (WebSocketException exception)
             {
-                Logger?.Invoke("Web socket exception occured: " + ex);
+                Logger?.Invoke($"WebSocked exception: {exception.Message}");
                 OnError?.Invoke();
             }
         }
 
+
+
         public async Task Disconnect()
         {
-            if(WebSocketConnection != null)
+            if (WebSocketConnection != null)
             {
                 await WebSocketConnection.DisconnectAsync();
             }
@@ -51,7 +53,7 @@ namespace ClientData
 
         public async Task SendAsync(string message)
         {
-            if(WebSocketConnection != null)
+            if (WebSocketConnection != null)
             {
                 await WebSocketConnection.SendAsync(message);
             }
