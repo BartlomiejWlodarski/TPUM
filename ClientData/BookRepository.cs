@@ -7,14 +7,12 @@ namespace ClientData
     internal class BookRepository : IBookRepository
     {
         private readonly List<IBook> _books = new();
-
-        public event EventHandler<BookRepositoryChangedEventArgs>? BookRepositoryChangedHandler;
-        public event Action? AllBooksUpdated;
-        public event EventHandler<BookRepositoryReplacedEventArgs>? BookRepositoryReplacedHandler;
+        private object bookLock = new object();
 
         private HashSet<IObserver<BookRepositoryChangedEventArgs>> observers;
 
-        private object bookLock = new object();
+        public event Action? AllBooksUpdated;
+        public event EventHandler<BookRepositoryChangedEventArgs>? BookRepositoryChangedHandler;
 
         IConnectionService connectionService;
 
@@ -50,7 +48,7 @@ namespace ClientData
                         RemoveBook(response.book.Id);
                         break;
                     case 2:
-                        ChangeBook(response.book.ToBook());
+                        ReplaceBook(response.book.ToBook());
                         break;
                     default:
                         break;
@@ -66,6 +64,84 @@ namespace ClientData
                 TransactionResultResponse response = serializer.Deserialize<TransactionResultResponse>(message);
                 //TransactionResult?.Invoke(response.ResultCode);
             }
+        }
+
+        public async Task RequestBooks()
+        {
+            Serializer serializer = Serializer.Create();
+            await connectionService.SendAsync(serializer.Serialize(new GetBooksCommand()));
+        }
+
+        public async Task SellBook(int id, string username)
+        {
+            if (connectionService.IsConnected())
+            {
+                Serializer serializer = Serializer.Create();
+                SellBookCommand command = new SellBookCommand(id, username);
+                await connectionService.SendAsync(serializer.Serialize<SellBookCommand>(command));
+            }
+        }
+
+        public void RequestUpdate()
+        {
+            if (connectionService.IsConnected())
+            {
+                Task task = Task.Run(async () => await RequestBooks());
+            }
+        }
+
+
+        public List<IBook> GetAllBooks()
+        {
+            List<IBook> books = new List<IBook> ();
+            lock (bookLock)
+            {
+                books.AddRange (_books.Select(book => (IBook)book.Clone()));
+            }
+            return books;
+        }
+
+        public void ReplaceBook(IBook replacement)
+        {
+            lock (bookLock)
+            {
+                int index = _books.FindIndex(book => book.Id == replacement.Id);
+                if(index > -1 && index < _books.Count)
+                {
+                    _books[index] = replacement;
+                }
+            }
+
+            foreach(IObserver<BookRepositoryChangedEventArgs>? observer in observers)
+            {
+                observer.OnNext(new BookRepositoryChangedEventArgs(replacement, BookRepositoryChangedEventType.Modified));
+            }
+        }
+
+        public void AddBook(IBook book)
+        {
+            lock (bookLock)
+            {
+                _books.Add(book);
+            }
+        }
+
+        public void RemoveBook(int bookID)
+        {
+            lock (bookLock)
+            {
+                _books.RemoveAll(x => x.Id == bookID);
+            }
+        }
+
+        public IBook? GetBookByID(int bookID)
+        {
+            IBook? result = null;
+            lock (bookLock)
+            {
+                result = _books.Find(x => x.Id == bookID);
+            }
+            return result;
         }
 
         private void UpdateAllBooks(AllBooksUpdateResponse response)

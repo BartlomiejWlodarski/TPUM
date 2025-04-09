@@ -10,13 +10,21 @@ namespace ClientLogic
 
         public event EventHandler<LogicBookRepositoryChangedEventArgs>? BookRepositoryChanged;
         public event EventHandler<LogicUserChangedEventArgs>? UserChanged;
-        public event Action<int>? LogicTransactionResult;
         public event Action? LogicAllBooksUpdated;
-        public event EventHandler<LogicBookRepositoryReplacedEventArgs>? BookRepositoryReplaced;
 
         private IDisposable BookRepoHandle;
 
-        private object booksLock = new object();
+        public BookService(AbstractDataAPI dataAPI)
+        {
+            _bookRepository = dataAPI.GetBookRepository();
+            _dataAPI = dataAPI;
+
+            BookRepoHandle = _bookRepository.Subscribe(this);
+
+            _bookRepository.AllBooksUpdated += () => LogicAllBooksUpdated?.Invoke();
+            _bookRepository.BookRepositoryChangedHandler += HandleOnBookRepositoryChanged;
+            _dataAPI.GetUserContainer().UserChanged += HandleOnUserChanged;
+        }
 
         private void HandleOnBookRepositoryChanged(object sender, BookRepositoryChangedEventArgs e)
         {
@@ -28,32 +36,39 @@ namespace ClientLogic
             UserChanged?.Invoke(this, new LogicUserChangedEventArgs(e));
         }
 
-        private void HandleOnBookRepositoryReplaced(object sender, BookRepositoryReplacedEventArgs e)
+        public void GetUser(string userName)
         {
-            BookRepositoryReplaced?.Invoke(this,new LogicBookRepositoryReplacedEventArgs(e));
+            _dataAPI.GetUser(userName);
         }
 
-        public BookService(AbstractDataAPI dataAPI)
+        public void RequestUpdate()
         {
-            _dataAPI = dataAPI;
-            _bookRepository = dataAPI.BookRepository;
-            _bookRepository.BookRepositoryChangedHandler += HandleOnBookRepositoryChanged;
-            _dataAPI.User.UserChanged += HandleOnUserChanged;
-            _bookRepository.BookRepositoryReplacedHandler += HandleOnBookRepositoryReplaced;
-            _dataAPI.TransactionResult += (int code) => LogicTransactionResult?.Invoke(code);
-            _bookRepository.AllBooksUpdated += () => LogicAllBooksUpdated?.Invoke();
-
-            BookRepoHandle = _bookRepository.Subscribe(this);
+            _bookRepository.RequestUpdate();
         }
 
-        public IEnumerable<ILogicBook> GetAvailableBooks() => _bookRepository.GetAllBooks().Select(book => new LogicBook(book));
-
-        public void BuyBook(int id)
+        public async Task SellBook(int id)
         {
-            lock (booksLock)
+            List<ILogicBook> books = _bookRepository.GetAllBooks().Select(book => new LogicBook(book)).Cast<ILogicBook>().ToList();
+            ILogicBook? foundBook = books.Find((book) => book.Id == id);
+            if(foundBook != null)
             {
-                _dataAPI?.BuyBook(id);
+                await _bookRepository.SellBook(foundBook.Id,_dataAPI.GetUserContainer().user.Name);
+            } 
+            else
+            {
+
             }
+        }
+
+        public List<ILogicBook> GetAllBooks()
+        {
+            return _bookRepository.GetAllBooks().Select(book => new LogicBook(book)).Cast<ILogicBook>().ToList();
+        }
+
+        public ILogicBook? GetBookByID(int bookID)
+        {
+            IBook? result = _bookRepository.GetBookByID(bookID);
+            return result == null? null : new LogicBook(result);
         }
 
         public void OnCompleted()
@@ -63,22 +78,12 @@ namespace ClientLogic
 
         public void OnError(Exception error)
         {
-            
+
         }
 
         public void OnNext(BookRepositoryChangedEventArgs value)
         {
-            BookRepositoryChanged?.Invoke(this,new LogicBookRepositoryChangedEventArgs(value));
-        }
-
-        public void GetUser(string userName)
-        {
-            _dataAPI.GetUser(userName);
-        }
-
-        public void GetBooks()
-        {
-            _dataAPI.RequestBooks();
+            BookRepositoryChanged?.Invoke(this, new LogicBookRepositoryChangedEventArgs(value));
         }
     }
 }

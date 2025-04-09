@@ -10,7 +10,7 @@
         Science_Fiction
     }
 
-    public interface IBook
+    public interface IBook : ICloneable
     {
         int Id { get; set; }
         string Title { get; set; }

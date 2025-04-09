@@ -5,20 +5,20 @@ namespace ClientLogic
 {
     internal class LogicAPI : AbstractLogicAPI
     {
-        private readonly AbstractDataAPI _dataAPI;
+        private readonly IUser user;
         private readonly IBookService _bookService;
         private readonly ILogicConnectionService _logicConnectionService;
 
-        public LogicAPI(AbstractDataAPI dataAPI)
+        public LogicAPI(AbstractDataAPI dataAPI) : base(dataAPI)
         {
-            _dataAPI = dataAPI;
             _bookService = new BookService(dataAPI);
-            _logicConnectionService = new LogicConnectionService(_dataAPI.GetConnectionService());
+            user = dataAPI.GetUserContainer().user;
+            _logicConnectionService = new LogicConnectionService(dataAPI.GetConnectionService());
         }
-
-        public override IUser User => _dataAPI.User.user;
-
-        public override IBookService BookService => _bookService;
+        public override IBookService GetBookService()
+        {
+            return _bookService;
+        }
 
         public override ILogicConnectionService GetConnectionService()
         {
@@ -27,7 +27,7 @@ namespace ClientLogic
 
         public override ILogicUser GetUser()
         {
-            return new LogicUser(User);
+            return new LogicUser(user);
         }
     }
 }

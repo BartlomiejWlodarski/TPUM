@@ -6,14 +6,17 @@ namespace ClientLogic.Abstract
     {
         public event EventHandler<LogicBookRepositoryChangedEventArgs> BookRepositoryChanged;
         public event EventHandler<LogicUserChangedEventArgs> UserChanged;
-        public event EventHandler<LogicBookRepositoryReplacedEventArgs> BookRepositoryReplaced;
-        public event Action<int>? LogicTransactionResult;
         public event Action? LogicAllBooksUpdated;
 
-        IEnumerable<ILogicBook> GetAvailableBooks();
-        void BuyBook(int id);
+        public void RequestUpdate();
+
+        public Task SellBook(int id);
+
+        public List<ILogicBook> GetAllBooks();
+
         void GetUser(string userName);
-        void GetBooks();
+
+        public ILogicBook? GetBookByID(int bookID);
     }
 
     public class LogicBookRepositoryChangedEventArgs : EventArgs

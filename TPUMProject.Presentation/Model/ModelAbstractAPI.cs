@@ -4,9 +4,9 @@ namespace TPUMProject.Presentation.Model
 {
     public class ModelBookRepositoryReplacedEventArgs : EventArgs
     {
-        public IEnumerable<IModelBook> modelBooks;
+        public IEnumerable<ModelBook> modelBooks;
 
-        public ModelBookRepositoryReplacedEventArgs(IEnumerable<IModelBook> modelBooks)
+        public ModelBookRepositoryReplacedEventArgs(IEnumerable<ModelBook> modelBooks)
         {
             this.modelBooks = modelBooks;
         }
@@ -18,10 +18,10 @@ namespace TPUMProject.Presentation.Model
 
     public class ModelBookRepositoryChangedEventArgs : EventArgs
     {
-        public IModelBook AffectedBook;
+        public ModelBook AffectedBook;
         public int BookChangedEventType;
 
-        public ModelBookRepositoryChangedEventArgs(IModelBook affectedBook, int bookChangedEventType)
+        public ModelBookRepositoryChangedEventArgs(ModelBook affectedBook, int bookChangedEventType)
         {
             AffectedBook = affectedBook;
             BookChangedEventType = bookChangedEventType;
@@ -49,70 +49,31 @@ namespace TPUMProject.Presentation.Model
         }
     }
 
-    public abstract class ModelAbstractAPI
+    public class Model
     {
-        public event EventHandler<ModelBookRepositoryChangedEventArgs>? Changed;
-        public event EventHandler<ModelUserChangedEventArgs>? UserChanged;
-        public Action? ModelAllBooksUpdated;
-        public event EventHandler<ModelBookRepositoryReplacedEventArgs>? ModelBookRepositoryReplaced;
+        private AbstractLogicAPI abstractLogic;
+        public ModelConnectionService ModelConnectionService { get; private set; }
+        public ModelBookRepository ModelBookRepository { get; private set; }
 
-        public static ModelAbstractAPI CreateModel(AbstractLogicAPI? logicAPI = default)
+        public Action? ModelAllBooksUpdated;
+
+        public Model(AbstractLogicAPI? abstractLogic)
         {
-            return new ModelLayer(logicAPI ?? AbstractLogicAPI.Create());
+            this.abstractLogic = abstractLogic ?? AbstractLogicAPI.Create();
+
+            ModelBookRepository = new ModelBookRepository(this.abstractLogic.GetBookService());
+            ModelConnectionService = new ModelConnectionService(this.abstractLogic.GetConnectionService());
         }
 
-        public abstract void BuyBook(int id);
-        public abstract void GetUser(string username);
-        public abstract void GetBooks();
 
-        public ModelBookRepository? ModelRepository { get; private set; }
-        public IModelConnectionService ConnectionService;
+        public async Task SellBook(int id)
+        {
+            await abstractLogic.GetBookService().SellBook(id);
+        }
 
-        internal class ModelLayer : ModelAbstractAPI {
-
-            private readonly AbstractLogicAPI _logicLayer;
-
-            public ModelLayer(AbstractLogicAPI logicLayer)
-            {
-                _logicLayer = logicLayer;
-                _logicLayer.BookService.BookRepositoryChanged += HandleBookRepositoryChanged;
-                _logicLayer.BookService.UserChanged += HandleUserChanged;
-                _logicLayer.BookService.BookRepositoryReplaced += HandleBookRepositoryReplaced;
-                ModelRepository = new ModelBookRepository(_logicLayer.BookService);
-                ConnectionService = new ModelConnectionService(_logicLayer.GetConnectionService());
-                //_logicLayer.BookService.LogicAllBooksUpdated += () => ModelAllBooksUpdated?.Invoke();
-                _logicLayer.BookService.LogicAllBooksUpdated += () => ModelRepository.ModelAllBooksUpdated?.Invoke();
-            }
-
-            public override void BuyBook(int id)
-            {
-                _logicLayer.BookService.BuyBook(id);
-            }
-
-            public override void GetBooks()
-            {
-                _logicLayer.BookService.GetBooks();
-            }
-
-            public override void GetUser(string username)
-            {
-                _logicLayer.BookService.GetUser(username);
-            }
-
-            private void HandleBookRepositoryChanged(object sender, LogicBookRepositoryChangedEventArgs e)
-            {
-                Changed?.Invoke(this, new ModelBookRepositoryChangedEventArgs(e));
-            }
-
-            private void HandleUserChanged(object sender, LogicUserChangedEventArgs e)
-            {
-                UserChanged?.Invoke(this, new ModelUserChangedEventArgs(e));
-            }
-
-            private void HandleBookRepositoryReplaced(object sender, LogicBookRepositoryReplacedEventArgs e)
-            {
-                ModelBookRepositoryReplaced?.Invoke(this,new ModelBookRepositoryReplacedEventArgs(e));
-            }
+        public void GetUser(string userName)
+        {
+            abstractLogic.GetBookService().GetUser(userName);
         }
     }
 }

@@ -13,9 +13,9 @@ namespace ClientData
         private readonly IConnectionService _connectionService;
         public DataAPI(IConnectionService connectionService)
         {
-            _bookRepository = new BookRepository();
-            _userContainer = new UserContainer();
             _connectionService = connectionService ?? new ConnectionService();
+            _bookRepository = new BookRepository(_connectionService);
+            _userContainer = new UserContainer();
             _connectionService.OnMessage += OnMessage;
         }
 

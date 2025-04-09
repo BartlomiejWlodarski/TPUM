@@ -11,7 +11,7 @@ namespace TPUMProject.Presentation.ViewModel
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-        private ModelAbstractAPI ModelLayer;
+        private Model.Model ModelLayer;
         private bool CatalogActive = true;
         private IModelUser _user;
         public IModelUser User
@@ -27,8 +27,123 @@ namespace TPUMProject.Presentation.ViewModel
             }
         }
 
-        private const string _shopList = "Show avaiable books list";
-        private const string _userList = "Show user books list";
+
+        private AsyncObservableCollection<ViewModelBook> booksShow;
+        public AsyncObservableCollection<ViewModelBook> BooksShow
+        {
+            get => booksShow;
+            private set
+            {
+                if (booksShow != value)
+                {
+                    booksShow = value;
+                    OnPropertyChanged("BooksShow");
+                }
+            }
+        }
+
+        public MainWindowViewModel()
+        {
+            ModelLayer = new Model.Model(null);
+            ModelLayer.ModelConnectionService.OnConnectionStateChanged += OnConnectionStateChange;
+            ModelLayer.ModelConnectionService.OnError += OnConnectionStateChange;
+            ModelLayer.ModelConnectionService.Logger += Log;
+            ModelLayer.ModelConnectionService.OnMessage += OnMessage;
+
+            ModelLayer.ModelBookRepository.ModelAllBooksUpdated += HandleOnBooksUpdated;
+            ModelLayer.ModelBookRepository.UserChanged += HandleUserChanged;
+            ModelLayer.ModelBookRepository.BookRepositoryChanged += HandleBookRepositoryChanged;
+
+            OnConnectionStateChange();
+
+            BooksShow = new AsyncObservableCollection<ViewModelBook>(ModelLayer.ModelBookRepository.GetAllBooks().Select(book => new ViewModelBook(book)));
+
+            //BooksShow = Books;
+
+            Buy = new RelayCommand(() => RelayBuy());
+            ChangeList = new RelayCommand(() => RelayChangeList());
+        }
+
+        private void OnConnectionStateChange()
+        {
+            bool connectionState = ModelLayer.ModelConnectionService.IsConnected();
+            ConnectionStateString = connectionState ? "Connected" : "Disconnected";
+
+            if (connectionState)
+            {
+                ModelLayer.GetUser("Marcin");
+                ModelLayer.ModelBookRepository.RequestUpdate();
+            }
+            else
+            {
+                Task.Run(() => ModelLayer.ModelConnectionService.Connect(new Uri("ws://localhost:42069/")));
+            }
+        }
+
+        public void Log(string message)
+        {
+            Console.WriteLine(message);
+        } 
+
+        public void OnMessage(string message)
+        {
+            Log($"New message: {message}");
+        }
+
+        private void HandleOnBooksUpdated()
+        {
+            RefreshBooks();
+        }
+        private void HandleUserChanged(object sender, ModelUserChangedEventArgs e)
+        {
+            User = e.user;
+        }
+
+        private void HandleBookRepositoryChanged(object sender, ModelBookRepositoryChangedEventArgs e)
+        {
+            switch (e.BookChangedEventType)
+            {
+                case 0:
+                    books.Add(new ViewModelBook(e.AffectedBook)); //Added
+                    break;
+
+                case 1:
+                    books.Remove(Books.Where(book => book.Id == e.AffectedBook.Id).Single()); //Removed
+                    break;
+
+                case 2:
+                    if (books.Count == 0) return;
+                    int index = books.IndexOf(books.Where(book => book.Id == e.AffectedBook.Id).Single());
+                    if (index < 0 || index >= books.Count) return;
+                    books[index] = new ViewModelBook(e.AffectedBook); // Modified
+                    break;
+            }
+        }
+
+        private void RefreshBooks()
+        {
+            booksShow.Clear();
+            if (CatalogActive)
+            {
+                booksShow.AddRange(ModelLayer.ModelBookRepository.GetAllBooks().Select(x => new ViewModelBook(x)));
+                //ShoppingButtonContent = _shopList;
+                //ButtonVisibility = Visibility.Hidden;
+            }
+            else
+            {
+                //BooksShow = Books;
+                //ShoppingButtonContent = _userList;
+                // ButtonVisibility = Visibility.Visible;
+            }
+        }
+
+        public async Task CloseConnection()
+        {
+            if (ModelLayer.ModelConnectionService.IsConnected())
+            {
+                await ModelLayer.ModelConnectionService.Disconnect();
+            }
+        }
 
         private string _shoppingButtonContent = _userList;
         public string ShoppingButtonContent
@@ -43,110 +158,6 @@ namespace TPUMProject.Presentation.ViewModel
         public ICommand Buy { get; set; }
         public ICommand ChangeList { get; set; }
 
-        public MainWindowViewModel() : this(null)
-        { }
-
-        public MainWindowViewModel(ModelAbstractAPI modelLayerAPI)
-        {
-            ModelLayer = modelLayerAPI == null ? ModelAbstractAPI.CreateModel() : modelLayerAPI;
-            ModelLayer.ConnectionService.OnConnectionStateChanged += OnConnectionStateChange;
-            ModelLayer.ConnectionService.OnError += OnConnectionStateChange;
-
-            ModelLayer.Changed += HandleBookRepositoryChanged;
-            ModelLayer.UserChanged += HandleUserChanged;
-            ModelLayer.ModelBookRepositoryReplaced += HandleBookRepositoryReplaced;
-            //ModelLayer.ModelAllBooksUpdated += GetAllBooks;
-            ModelLayer.ModelRepository.ModelAllBooksUpdated += GetAllBooks;
-
-            OnConnectionStateChange();
-
-            Books = new AsyncObservableCollection<ViewModelBook>(ModelLayer.ModelRepository.GetAllBooks().Select(x => new ViewModelBook(x)));
-            BooksShow = Books;
-            //User = ModelLayer.User;
-
-            Buy = new RelayCommand(() => RelayBuy());
-            ChangeList = new RelayCommand(() => RelayChangeList());
-        }
-
-        private void GetAllBooks()
-        {
-            RefreshBooks();
-            //_booksShow.Clear();
-            //_booksShow.AddRange(ModelLayer.ModelRepository.GetAllBooks());
-        }
-
-        private void RefreshBooks()
-        {
-            _booksShow.Clear();
-            if (CatalogActive)
-            {
-                _booksShow.AddRange(ModelLayer.ModelRepository.GetAllBooks().Select(x => new ViewModelBook(x)));
-                //ShoppingButtonContent = _shopList;
-                //ButtonVisibility = Visibility.Hidden;
-            }
-            else
-            {
-                //BooksShow = Books;
-                //ShoppingButtonContent = _userList;
-               // ButtonVisibility = Visibility.Visible;
-            }
-
-        }
-        public async Task CloseConnection()
-        {
-            if (ModelLayer.ConnectionService.IsConnected())
-            {
-                await ModelLayer.ConnectionService.Disconnect();
-            }
-        }
-
-        private void OnConnectionStateChange()
-        {
-            bool connectionState = ModelLayer.ConnectionService.IsConnected();
-            ConnectionStateString = connectionState ? "Connected" : "Disconnected";
-
-            if (connectionState)
-            {
-                ModelLayer.GetUser("Marcin");
-                ModelLayer.GetBooks();
-            }
-            else
-            {
-                Task.Run(() => ModelLayer.ConnectionService.Connect(new Uri("ws://localhost:42069/")));
-            }
-        }
-
-        private void HandleBookRepositoryReplaced(object sender, ModelBookRepositoryReplacedEventArgs e)
-        {
-            books.Clear();
-            //books.AddRange(e.modelBooks);
-        }
-
-        private void HandleUserChanged(object sender, ModelUserChangedEventArgs e)
-        {
-            User = e.user;
-        }
-
-        private void HandleBookRepositoryChanged(object sender, ModelBookRepositoryChangedEventArgs e)
-        {
-            switch (e.BookChangedEventType)
-            {
-                case 0:
-                    books.Add(new ViewModelBook(e.AffectedBook)); //Added
-                        break;
-                
-                case 1:
-                    books.Remove(Books.Where(book => book.Id == e.AffectedBook.Id).Single()); //Removed
-                    break;
-                
-                case 2:
-                    if (books.Count == 0) return;
-                    int index = books.IndexOf(books.Where(book => book.Id == e.AffectedBook.Id).Single());
-                    if (index < 0 || index >= books.Count) return;
-                    books[index] = new ViewModelBook(e.AffectedBook); // Modified
-                        break;
-            }
-        }
 
         private AsyncObservableCollection<ViewModelBook> books;
         public AsyncObservableCollection<ViewModelBook> Books 
@@ -161,19 +172,7 @@ namespace TPUMProject.Presentation.ViewModel
                 }
             }
         }
-        private AsyncObservableCollection<ViewModelBook> _booksShow;
-        public AsyncObservableCollection<ViewModelBook> BooksShow
-        {
-            get => _booksShow;
-            private set
-            {
-                if (_booksShow != value)
-                {
-                    _booksShow = value;
-                    OnPropertyChanged("BooksShow");
-                }
-            }
-        }
+
 
         private string _connectionStateString;
 
@@ -204,7 +203,10 @@ namespace TPUMProject.Presentation.ViewModel
 
         private void RelayBuy()
         {
-            if(selectedIndex >= 0 && selectedIndex < Books.Count)ModelLayer.BuyBook(Books[selectedIndex].Id);
+            if(selectedIndex >= 0 && selectedIndex < Books.Count)
+            {
+                Task.Run(async () => await ModelLayer.SellBook(Books[selectedIndex].Id));
+            }
         }
 
         private Visibility _buttonVisibility = Visibility.Visible;
@@ -243,5 +245,10 @@ namespace TPUMProject.Presentation.ViewModel
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+
+
+        private const string _shopList = "Show avaiable books list";
+        private const string _userList = "Show user books list";
     }
 }

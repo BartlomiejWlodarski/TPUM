@@ -20,7 +20,7 @@ namespace TPUMProject.Presentation.ViewModel
         public bool Recommended { get; set; }
         public SolidColorBrush backcolor { get; set; }
 
-        public ViewModelBook(IModelBook book)
+        public ViewModelBook(ModelBook book)
         {
             Id = book.Id;
             Title = book.Title;

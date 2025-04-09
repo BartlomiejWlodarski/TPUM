@@ -8,7 +8,7 @@ namespace TPUMProject.Presentation.Model
     {
         public string Name { get; }
         public decimal Balance {get; set;}
-        public IEnumerable<IModelBook> PurchasedBooks { get; }
+        public IEnumerable<ModelBook> PurchasedBooks { get; }
 
         public ModelUser(ILogicUser user)
         {

@@ -2,16 +2,16 @@
 {
     public interface IBookRepository : IObservable<BookRepositoryChangedEventArgs>
     {
-        public event EventHandler<BookRepositoryReplacedEventArgs> BookRepositoryReplacedHandler;
-
         public event EventHandler<BookRepositoryChangedEventArgs> BookRepositoryChangedHandler;
         public event Action? AllBooksUpdated;
 
-        public void RequestAllBooks();
+        public void RequestUpdate();
 
-        public Task SellBook(int id);
+        public Task SellBook(int id, string username);
 
         public List<IBook> GetAllBooks();
+
+        public IBook? GetBookByID(int bookID);
     }
 
     public enum BookRepositoryChangedEventType
