@@ -20,6 +20,18 @@ namespace TPUMProject.Presentation.ViewModel
         public bool Recommended { get; set; }
         public SolidColorBrush backcolor { get; set; }
 
+        public void ChangeBackcolor()
+        {
+            if (Recommended)
+            {
+                backcolor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 215, 0));
+            }
+            else
+            {
+                backcolor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(240, 240, 240));
+            }
+        }
+
         public ViewModelBook(ModelBook book)
         {
             Id = book.Id;
@@ -28,10 +40,8 @@ namespace TPUMProject.Presentation.ViewModel
             Genre = book.Genre;
             Price = book.Price;
             Recommended = book.Recommended;
-            backcolor = book.backcolor;
+            ChangeBackcolor();
         }
-
-
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

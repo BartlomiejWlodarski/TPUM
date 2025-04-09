@@ -102,11 +102,21 @@ namespace TPUMProject.Presentation.ViewModel
                     books.Remove(Books.FirstOrDefault(book => book.Id == e.AffectedBook.Id)); // Removed
                     break;
                 case 2:
-                    var item = Books.FirstOrDefault(book => book.Id == e.AffectedBook.Id);
+                    var item = Books.FirstOrDefault(book => book.Id == e.AffectedBook.Id);// Modified
                     if (item != null)
                     {
                         int index = Books.IndexOf(item);
-                        //if (index >= 0) books[index] = new ViewModelBook(e.AffectedBook); // Modified
+                        if (index >= 0)
+                        {
+                            ViewModelBook book = Books[index];
+                            book.Id = e.AffectedBook.Id;
+                            book.Recommended = e.AffectedBook.Recommended;
+                            book.Title = e.AffectedBook.Title;
+                            book.Author = e.AffectedBook.Author;
+                            book.Price = e.AffectedBook.Price;
+                            book.ChangeBackcolor();
+                        }
+                            
                     }
                     break;
             }
@@ -120,7 +130,6 @@ namespace TPUMProject.Presentation.ViewModel
         {
             Books.Clear();
             Books.AddRange(ModelLayer.ModelBookRepository.GetAllBooks().Select(x => new ViewModelBook(x)));
-            //BooksShow = Books;
         }
 
         public async Task CloseConnection()
