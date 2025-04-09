@@ -1,4 +1,5 @@
 ﻿using ClientLogic.Abstract;
+using System.Diagnostics;
 
 namespace TPUMProject.Presentation.Model
 {
@@ -15,14 +16,16 @@ namespace TPUMProject.Presentation.Model
             this.bookService = bookService;
 
             bookService.LogicAllBooksUpdated += () => ModelAllBooksUpdated?.Invoke();
+            bookService.UserChanged += HandleUserChanged;
+            bookService.BookRepositoryChanged += HandleBookRepositoryChanged;
         }
 
-        private void HandleBookRepositoryChanged(LogicBookRepositoryChangedEventArgs e)
+        private void HandleBookRepositoryChanged(object sender, LogicBookRepositoryChangedEventArgs e)
         {
             BookRepositoryChanged?.Invoke(this, new ModelBookRepositoryChangedEventArgs(e));
         }
 
-        private void HandleUserChanged(LogicUserChangedEventArgs e)
+        private void HandleUserChanged(object sender, LogicUserChangedEventArgs e)
         {
             UserChanged?.Invoke(this,new ModelUserChangedEventArgs(e));
         }

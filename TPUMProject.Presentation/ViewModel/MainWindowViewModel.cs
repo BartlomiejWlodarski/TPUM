@@ -11,6 +11,8 @@ namespace TPUMProject.Presentation.ViewModel
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
+        private object itemLock = new object();
+
         private Model.Model ModelLayer;
         private bool CatalogActive = true;
         private IModelUser _user;
@@ -56,7 +58,12 @@ namespace TPUMProject.Presentation.ViewModel
 
             OnConnectionStateChange();
 
-            BooksShow = new AsyncObservableCollection<ViewModelBook>(ModelLayer.ModelBookRepository.GetAllBooks().Select(book => new ViewModelBook(book)));
+            booksShow = new AsyncObservableCollection<ViewModelBook>(ModelLayer.ModelBookRepository.GetAllBooks().Select(book => new ViewModelBook(book)));
+
+
+            booksShow.Add(new ViewModelBook(new ModelBook(1, "kek", "kek", ModelGenre.Uncategorized, 20, false)));
+            booksShow.Add(new ViewModelBook(new ModelBook(2, "lol", "lol", ModelGenre.Uncategorized, 25, false)));
+            booksShow.Add(new ViewModelBook(new ModelBook(3, "uwu", "uwu", ModelGenre.Uncategorized, 30, false)));
 
             //BooksShow = Books;
 
@@ -112,20 +119,22 @@ namespace TPUMProject.Presentation.ViewModel
                     break;
 
                 case 2:
-                    if (books.Count == 0) return;
-                    int index = books.IndexOf(books.Where(book => book.Id == e.AffectedBook.Id).Single());
-                    if (index < 0 || index >= books.Count) return;
-                    books[index] = new ViewModelBook(e.AffectedBook); // Modified
+                    if (booksShow.Count == 0) return;
+                    ViewModelBook? viewModelBook = booksShow.Where(book => book.Id == e.AffectedBook.Id).Single();
+                    if(viewModelBook == null) return;
+                    int index = booksShow.IndexOf(viewModelBook);
+                    if (index < 0 || index >= booksShow.Count) return;
+                    booksShow[index] = new ViewModelBook(e.AffectedBook); // Modified
                     break;
             }
         }
 
         private void RefreshBooks()
         {
-            booksShow.Clear();
+            //booksShow.Clear();
             if (CatalogActive)
             {
-                booksShow.AddRange(ModelLayer.ModelBookRepository.GetAllBooks().Select(x => new ViewModelBook(x)));
+                //booksShow.AddRange(ModelLayer.ModelBookRepository.GetAllBooks().Select(x => new ViewModelBook(x)));
                 //ShoppingButtonContent = _shopList;
                 //ButtonVisibility = Visibility.Hidden;
             }
