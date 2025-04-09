@@ -43,7 +43,7 @@ namespace TPUMProject.Presentation.ViewModel
 
             OnConnectionStateChange();
 
-            Buy = new RelayCommand(() => RunOnUI(() => RelayBuy()));
+            Buy = new RelayCommand(() => RelayBuy());
             ChangeList = new RelayCommand(() => RelayChangeList());
         }
 
@@ -106,17 +106,21 @@ namespace TPUMProject.Presentation.ViewModel
                     if (item != null)
                     {
                         int index = Books.IndexOf(item);
-                        //if (index >= 0)
-                            //Books[index] = new ViewModelBook(e.AffectedBook); // Modified
+                        //if (index >= 0) books[index] = new ViewModelBook(e.AffectedBook); // Modified
                     }
                     break;
+            }
+            if (CatalogActive)
+            {
+                RunOnUI(() => BooksShow = new AsyncObservableCollection<ViewModelBook>(Books));
             }
         }
 
         private void RefreshBooks()
         {
-            BooksShow.Clear();
+            Books.Clear();
             Books.AddRange(ModelLayer.ModelBookRepository.GetAllBooks().Select(x => new ViewModelBook(x)));
+            //BooksShow = Books;
         }
 
         public async Task CloseConnection()

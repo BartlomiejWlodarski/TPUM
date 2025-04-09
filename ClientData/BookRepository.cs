@@ -39,16 +39,20 @@ namespace ClientData
             if (serializer.GetCommandHeader(message) == BookChangedResponse.StaticHeader)
             {
                 BookChangedResponse response = serializer.Deserialize<BookChangedResponse>(message);
+                IBook book = response.book.ToBook();
                 switch (response.changeType)
                 {
                     case 0:
-                        AddBook(response.book.ToBook());
+                        AddBook(book);
+                        BookRepositoryChangedHandler?.Invoke(this,new BookRepositoryChangedEventArgs(book, BookRepositoryChangedEventType.Added));
                         break;
                     case 1:
-                        RemoveBook(response.book.Id);
+                        RemoveBook(book.Id);
+                        BookRepositoryChangedHandler?.Invoke(this, new BookRepositoryChangedEventArgs(book, BookRepositoryChangedEventType.Removed));
                         break;
                     case 2:
-                        ReplaceBook(response.book.ToBook());
+                        ReplaceBook(book);
+                        //BookRepositoryChangedHandler?.Invoke(this, new BookRepositoryChangedEventArgs(book, BookRepositoryChangedEventType.Modified));
                         break;
                     default:
                         break;
