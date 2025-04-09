@@ -13,8 +13,6 @@ namespace TPUMProject.Presentation.ViewModel
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-        private object itemLock = new object();
-
         private Model.Model ModelLayer;
         private bool CatalogActive = true;
         private IModelUser _user;
@@ -41,11 +39,11 @@ namespace TPUMProject.Presentation.ViewModel
             ModelLayer.ModelBookRepository.BookRepositoryChanged += (sender, e) => RunOnUI(() => HandleBookRepositoryChanged(sender, e));
 
             Books = new AsyncObservableCollection<ViewModelBook>();
-            BooksShow = new AsyncObservableCollection<ViewModelBook>();
+            BooksShow = Books;
 
             OnConnectionStateChange();
 
-            Buy = new RelayCommand(() => RelayBuy());
+            Buy = new RelayCommand(() => RunOnUI(() => RelayBuy()));
             ChangeList = new RelayCommand(() => RelayChangeList());
         }
 
@@ -108,8 +106,8 @@ namespace TPUMProject.Presentation.ViewModel
                     if (item != null)
                     {
                         int index = Books.IndexOf(item);
-                        if (index >= 0)
-                            Books[index] = new ViewModelBook(e.AffectedBook); // Modified
+                        //if (index >= 0)
+                            //Books[index] = new ViewModelBook(e.AffectedBook); // Modified
                     }
                     break;
             }
@@ -118,10 +116,7 @@ namespace TPUMProject.Presentation.ViewModel
         private void RefreshBooks()
         {
             BooksShow.Clear();
-            if (CatalogActive)
-            {
-                BooksShow.AddRange(ModelLayer.ModelBookRepository.GetAllBooks().Select(x => new ViewModelBook(x)));
-            }
+            Books.AddRange(ModelLayer.ModelBookRepository.GetAllBooks().Select(x => new ViewModelBook(x)));
         }
 
         public async Task CloseConnection()
@@ -145,13 +140,14 @@ namespace TPUMProject.Presentation.ViewModel
             if (CatalogActive)
             {
                 CatalogActive = false;
+                BooksShow = new AsyncObservableCollection<ViewModelBook>(User.PurchasedBooks.Select(x => new ViewModelBook(x)));
                 ShoppingButtonContent = _shopList;
                 ButtonVisibility = Visibility.Hidden;
             }
             else
             {
                 CatalogActive = true;
-                BooksShow = Books;
+                BooksShow = new AsyncObservableCollection<ViewModelBook>(Books);
                 ShoppingButtonContent = _userList;
                 ButtonVisibility = Visibility.Visible;
             }
