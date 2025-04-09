@@ -10,12 +10,14 @@ namespace TPUMProject.Presentation.Model
         public event EventHandler<ModelBookRepositoryChangedEventArgs>? BookRepositoryChanged;
         public event EventHandler<ModelUserChangedEventArgs>? UserChanged;
         public event Action? ModelAllBooksUpdated;
+        public event Action<int>? TransactionResult;
 
         public ModelBookRepository(IBookService bookService)
         {
             this.bookService = bookService;
 
             bookService.LogicAllBooksUpdated += () => ModelAllBooksUpdated?.Invoke();
+            bookService.TransactionResult += (int code) => TransactionResult?.Invoke(code);
             bookService.UserChanged += HandleUserChanged;
             bookService.BookRepositoryChanged += HandleBookRepositoryChanged;
         }

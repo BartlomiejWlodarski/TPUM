@@ -13,6 +13,7 @@ namespace ClientData
 
         public event Action? AllBooksUpdated;
         public event EventHandler<BookRepositoryChangedEventArgs>? BookRepositoryChangedHandler;
+        public event Action<int>? TransactionResult;
 
         IConnectionService connectionService;
 
@@ -66,7 +67,7 @@ namespace ClientData
             else if (serializer.GetCommandHeader(message) == TransactionResultResponse.StaticHeader)
             {
                 TransactionResultResponse response = serializer.Deserialize<TransactionResultResponse>(message);
-                //TransactionResult?.Invoke(response.ResultCode);
+                TransactionResult?.Invoke(response.ResultCode);
             }
         }
 
