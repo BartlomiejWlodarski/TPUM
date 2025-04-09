@@ -41,58 +41,89 @@ namespace ServerPresentation
             {
                 this.socket = socket;
                 this._endpoint = endpoint;
-                Task.Factory.StartNew(() => ServerMessageLoop(socket));
+                _ = Task.Run(() => ServerMessageLoop(socket));
             }
 
-            private void ServerMessageLoop(WebSocket webSocket)
+            protected override async Task SendTask(string message)
             {
-                byte[] socketBuffer = new byte[1024];
-
-                while (true)
+                if (socket.State == WebSocketState.Open)
                 {
-                    ArraySegment<byte> segments = new ArraySegment<byte>(socketBuffer);
-                    WebSocketReceiveResult receiveResult = webSocket.ReceiveAsync(segments,CancellationToken.None).Result;
-                    if ((receiveResult.MessageType == WebSocketMessageType.Close))
+                    try
                     {
-                        OnClose?.Invoke();
-                        webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Shutting down the socket",CancellationToken.None);
-                        return;
+                        await socket.SendAsync(
+                            message.ToArraySegment(),
+                            WebSocketMessageType.Text,
+                            true,
+                            CancellationToken.None);
                     }
-
-                    int count = receiveResult.Count;
-
-                    while (!receiveResult.EndOfMessage)
+                    catch (Exception ex)
                     {
-                        if( count >= socketBuffer.Length)
-                        {
-                            OnClose?.Invoke();
-                            webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Received message exceeds the limit of 1024 bytes", CancellationToken.None);
-                            return;
-                        }
-
-                        segments = new ArraySegment<byte>(socketBuffer, count, socketBuffer.Length - count);
-                        receiveResult = webSocket.ReceiveAsync(segments, CancellationToken.None).Result;
-                        count += receiveResult.Count;
+                        Console.WriteLine($"[SendTask] Server send error: {ex}");
+                        OnError?.Invoke();
                     }
-                    string message = Encoding.UTF8.GetString(socketBuffer,0,count);
-                    OnMessage?.Invoke(message);
+                }
+                else
+                {
+                    Console.WriteLine($"[SendTask] Cannot send — socket state: {socket.State}");
+                    OnError?.Invoke();
                 }
             }
 
-            public override string ToString()
+            public override async Task DisconnectAsync()
             {
-                return _endpoint.ToString();
+                if (socket.State == WebSocketState.Open || socket.State == WebSocketState.CloseReceived)
+                {
+                    await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Shutting down", CancellationToken.None);
+                }
+                OnClose?.Invoke();
             }
 
-            public override Task DisconnectAsync()
-            {
-                return socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Shutting down started", CancellationToken.None);
-            }
+            public override string ToString() => _endpoint.ToString();
 
-            protected override Task SendTask(string message)
+            private async Task ServerMessageLoop(WebSocket webSocket)
             {
-                return socket.SendAsync(message.ToArraySegment(), WebSocketMessageType.Text, true, CancellationToken.None);
+                byte[] buffer = new byte[1024];
+                try
+                {
+                    while (webSocket.State == WebSocketState.Open)
+                    {
+                        var segment = new ArraySegment<byte>(buffer);
+                        var result = await webSocket.ReceiveAsync(segment, CancellationToken.None);
+
+                        if (result.MessageType == WebSocketMessageType.Close)
+                        {
+                            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Server closing", CancellationToken.None);
+                            OnClose?.Invoke();
+                            return;
+                        }
+
+                        int count = result.Count;
+                        while (!result.EndOfMessage)
+                        {
+                            if (count >= buffer.Length)
+                            {
+                                await webSocket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "Too long message", CancellationToken.None);
+                                OnClose?.Invoke();
+                                return;
+                            }
+
+                            segment = new ArraySegment<byte>(buffer, count, buffer.Length - count);
+                            result = await webSocket.ReceiveAsync(segment, CancellationToken.None);
+                            count += result.Count;
+                        }
+
+                        string message = Encoding.UTF8.GetString(buffer, 0, count);
+                        OnMessage?.Invoke(message);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[ServerMessageLoop] Exception: {ex}");
+                    await webSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, "Exception occurred", CancellationToken.None);
+                    OnError?.Invoke();
+                }
             }
         }
+
     }
 }

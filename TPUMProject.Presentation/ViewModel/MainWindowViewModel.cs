@@ -1,7 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using TPUMProject.Presentation.Model;
@@ -14,54 +16,43 @@ namespace TPUMProject.Presentation.ViewModel
         private Model.Model ModelLayer;
         private bool CatalogActive = true;
         private IModelUser _user;
-        public IModelUser User
-        {
-            get => _user;
-            set
-            {
-                if(value != _user)
-                {
-                    _user = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-
+        private AsyncObservableCollection<ViewModelBook> books;
         private AsyncObservableCollection<ViewModelBook> booksShow;
-        public AsyncObservableCollection<ViewModelBook> BooksShow
-        {
-            get => booksShow;
-            private set
-            {
-                if (booksShow != value)
-                {
-                    booksShow = value;
-                    OnPropertyChanged("BooksShow");
-                }
-            }
-        }
+        private string _shoppingButtonContent = _userList;
+        private string _connectionStateString;
+        private Visibility _buttonVisibility = Visibility.Visible;
+        private int selectedIndex = 0;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public MainWindowViewModel()
         {
             ModelLayer = new Model.Model(null);
-            ModelLayer.ModelConnectionService.OnConnectionStateChanged += OnConnectionStateChange;
-            ModelLayer.ModelConnectionService.OnError += OnConnectionStateChange;
-            ModelLayer.ModelConnectionService.Logger += Log;
-            ModelLayer.ModelConnectionService.OnMessage += OnMessage;
 
-            ModelLayer.ModelBookRepository.ModelAllBooksUpdated += HandleOnBooksUpdated;
-            ModelLayer.ModelBookRepository.UserChanged += HandleUserChanged;
-            ModelLayer.ModelBookRepository.BookRepositoryChanged += HandleBookRepositoryChanged;
+            ModelLayer.ModelConnectionService.OnConnectionStateChanged += () => RunOnUI(OnConnectionStateChange);
+            ModelLayer.ModelConnectionService.OnError += () => RunOnUI(OnConnectionStateChange);
+            ModelLayer.ModelConnectionService.Logger += (message) => RunOnUI(() => Log(message));
+            ModelLayer.ModelConnectionService.OnMessage += (message) => RunOnUI(() => OnMessage(message));
+
+            ModelLayer.ModelBookRepository.ModelAllBooksUpdated += () => RunOnUI(HandleOnBooksUpdated);
+            ModelLayer.ModelBookRepository.UserChanged += (sender, e) => RunOnUI(() => HandleUserChanged(sender, e));
+            ModelLayer.ModelBookRepository.BookRepositoryChanged += (sender, e) => RunOnUI(() => HandleBookRepositoryChanged(sender, e));
+
+            Books = new AsyncObservableCollection<ViewModelBook>();
+            BooksShow = new AsyncObservableCollection<ViewModelBook>();
 
             OnConnectionStateChange();
 
-            BooksShow = new AsyncObservableCollection<ViewModelBook>(ModelLayer.ModelBookRepository.GetAllBooks().Select(book => new ViewModelBook(book)));
-
-            //BooksShow = Books;
-
             Buy = new RelayCommand(() => RelayBuy());
             ChangeList = new RelayCommand(() => RelayChangeList());
+        }
+
+        private void RunOnUI(Action action)
+        {
+            if (Application.Current.Dispatcher.CheckAccess())
+                action();
+            else
+                Application.Current.Dispatcher.Invoke(action);
         }
 
         private void OnConnectionStateChange()
@@ -83,7 +74,7 @@ namespace TPUMProject.Presentation.ViewModel
         public void Log(string message)
         {
             Console.WriteLine(message);
-        } 
+        }
 
         public void OnMessage(string message)
         {
@@ -94,6 +85,7 @@ namespace TPUMProject.Presentation.ViewModel
         {
             RefreshBooks();
         }
+
         private void HandleUserChanged(object sender, ModelUserChangedEventArgs e)
         {
             User = e.user;
@@ -104,36 +96,29 @@ namespace TPUMProject.Presentation.ViewModel
             switch (e.BookChangedEventType)
             {
                 case 0:
-                    books.Add(new ViewModelBook(e.AffectedBook)); //Added
+                    books.Add(new ViewModelBook(e.AffectedBook)); // Added
                     break;
-
                 case 1:
-                    books.Remove(Books.Where(book => book.Id == e.AffectedBook.Id).Single()); //Removed
+                    books.Remove(Books.FirstOrDefault(book => book.Id == e.AffectedBook.Id)); // Removed
                     break;
-
                 case 2:
-                    if (books.Count == 0) return;
-                    int index = books.IndexOf(books.Where(book => book.Id == e.AffectedBook.Id).Single());
-                    if (index < 0 || index >= books.Count) return;
-                    books[index] = new ViewModelBook(e.AffectedBook); // Modified
+                    var item = Books.FirstOrDefault(book => book.Id == e.AffectedBook.Id);
+                    if (item != null)
+                    {
+                        int index = Books.IndexOf(item);
+                        if (index >= 0)
+                            Books[index] = new ViewModelBook(e.AffectedBook); // Modified
+                    }
                     break;
             }
         }
 
         private void RefreshBooks()
         {
-            booksShow.Clear();
+            BooksShow.Clear();
             if (CatalogActive)
             {
-                booksShow.AddRange(ModelLayer.ModelBookRepository.GetAllBooks().Select(x => new ViewModelBook(x)));
-                //ShoppingButtonContent = _shopList;
-                //ButtonVisibility = Visibility.Hidden;
-            }
-            else
-            {
-                //BooksShow = Books;
-                //ShoppingButtonContent = _userList;
-                // ButtonVisibility = Visibility.Visible;
+                BooksShow.AddRange(ModelLayer.ModelBookRepository.GetAllBooks().Select(x => new ViewModelBook(x)));
             }
         }
 
@@ -145,93 +130,22 @@ namespace TPUMProject.Presentation.ViewModel
             }
         }
 
-        private string _shoppingButtonContent = _userList;
-        public string ShoppingButtonContent
-        {
-            get => _shoppingButtonContent;
-            set
-            {
-                _shoppingButtonContent = value;
-                OnPropertyChanged();
-            }
-        }
-        public ICommand Buy { get; set; }
-        public ICommand ChangeList { get; set; }
-
-
-        private AsyncObservableCollection<ViewModelBook> books;
-        public AsyncObservableCollection<ViewModelBook> Books 
-        { 
-            get => books;
-            private set
-            {
-                if (books != value)
-                {
-                    books = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-
-        private string _connectionStateString;
-
-        public string ConnectionStateString
-        {
-            get => _connectionStateString;
-            set
-            {
-                if(value != _connectionStateString)
-                {
-                    _connectionStateString = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        private int selectedIndex = 0;
-
-        public int SelectedIndex
-        {
-            get { return selectedIndex; }
-            set
-            {
-                selectedIndex = value;
-                OnPropertyChanged();
-            }
-        }
-
         private void RelayBuy()
         {
-            if(selectedIndex >= 0 && selectedIndex < Books.Count)
+            if (selectedIndex >= 0 && selectedIndex < Books.Count)
             {
                 Task.Run(async () => await ModelLayer.SellBook(Books[selectedIndex].Id));
             }
         }
 
-        private Visibility _buttonVisibility = Visibility.Visible;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public Visibility ButtonVisibility
-        {
-            get => _buttonVisibility;
-            set
-            {
-                _buttonVisibility = value;
-                OnPropertyChanged();
-            }
-        }
-
         private void RelayChangeList()
         {
-            if(CatalogActive)
+            if (CatalogActive)
             {
                 CatalogActive = false;
-                //BooksShow = new AsyncObservableCollection<IModelBook>(User.PurchasedBooks);
                 ShoppingButtonContent = _shopList;
                 ButtonVisibility = Visibility.Hidden;
-            } 
+            }
             else
             {
                 CatalogActive = true;
@@ -246,7 +160,92 @@ namespace TPUMProject.Presentation.ViewModel
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        // === Public Properties ===
 
+        public IModelUser User
+        {
+            get => _user;
+            set
+            {
+                if (value != _user)
+                {
+                    _user = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public AsyncObservableCollection<ViewModelBook> Books
+        {
+            get => books;
+            private set
+            {
+                if (books != value)
+                {
+                    books = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public AsyncObservableCollection<ViewModelBook> BooksShow
+        {
+            get => booksShow;
+            private set
+            {
+                if (booksShow != value)
+                {
+                    booksShow = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string ShoppingButtonContent
+        {
+            get => _shoppingButtonContent;
+            set
+            {
+                _shoppingButtonContent = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ICommand Buy { get; set; }
+        public ICommand ChangeList { get; set; }
+
+        public string ConnectionStateString
+        {
+            get => _connectionStateString;
+            set
+            {
+                if (value != _connectionStateString)
+                {
+                    _connectionStateString = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public Visibility ButtonVisibility
+        {
+            get => _buttonVisibility;
+            set
+            {
+                _buttonVisibility = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int SelectedIndex
+        {
+            get { return selectedIndex; }
+            set
+            {
+                selectedIndex = value;
+                OnPropertyChanged();
+            }
+        }
 
         private const string _shopList = "Show avaiable books list";
         private const string _userList = "Show user books list";

@@ -38,37 +38,60 @@ namespace ClientData
                 this.clientWebSocket = clientWebSocket;
                 this.peer = peer;
                 this.log = log;
-                Task.Factory.StartNew(ClientMessageLoop);
+                _ = Task.Run(ClientMessageLoop);
             }
 
-            protected override Task SendTask(string message)
+            protected override async Task SendTask(string message)
             {
-                return clientWebSocket.SendAsync(message.ToArraySegment(), WebSocketMessageType.Text, true, CancellationToken.None);
+                if (clientWebSocket.State == WebSocketState.Open)
+                {
+                    try
+                    {
+                        await clientWebSocket.SendAsync(
+                            message.ToArraySegment(),
+                            WebSocketMessageType.Text,
+                            true,
+                            CancellationToken.None);
+                    }
+                    catch (Exception ex)
+                    {
+                        log($"[SendTask] Error while sending: {ex}");
+                        OnError?.Invoke();
+                    }
+                }
+                else
+                {
+                    log($"[SendTask] WebSocket is not open. Current state: {clientWebSocket.State}");
+                    OnError?.Invoke();
+                }
             }
 
-            public override Task DisconnectAsync()
+            public override async Task DisconnectAsync()
             {
-                return clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Shutdown procedure started", CancellationToken.None);
+                if (clientWebSocket.State == WebSocketState.Open || clientWebSocket.State == WebSocketState.CloseReceived)
+                {
+                    await clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Shutdown procedure started", CancellationToken.None);
+                }
+                clientWebSocket.Dispose();
+                OnClose?.Invoke();
             }
 
-            public override string ToString()
-            {
-                return peer.ToString();
-            }
+            public override string ToString() => peer.ToString();
 
-            private void ClientMessageLoop()
+            private async Task ClientMessageLoop()
             {
                 try
                 {
                     byte[] buffer = new byte[1024];
-                    while (true)
+                    while (clientWebSocket.State == WebSocketState.Open)
                     {
-                        ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
-                        WebSocketReceiveResult result = clientWebSocket.ReceiveAsync(segment, CancellationToken.None).Result;
+                        var segment = new ArraySegment<byte>(buffer);
+                        var result = await clientWebSocket.ReceiveAsync(segment, CancellationToken.None);
+
                         if (result.MessageType == WebSocketMessageType.Close)
                         {
+                            await clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client closing", CancellationToken.None);
                             OnClose?.Invoke();
-                            clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "I am closing", CancellationToken.None).Wait();
                             return;
                         }
 
@@ -77,15 +100,13 @@ namespace ClientData
                         {
                             if (count >= buffer.Length)
                             {
+                                await clientWebSocket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "Too long message", CancellationToken.None);
                                 OnClose?.Invoke();
-                                clientWebSocket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "That's too long",
-                                        CancellationToken.None)
-                                    .Wait();
                                 return;
                             }
 
                             segment = new ArraySegment<byte>(buffer, count, buffer.Length - count);
-                            result = clientWebSocket.ReceiveAsync(segment, CancellationToken.None).Result;
+                            result = await clientWebSocket.ReceiveAsync(segment, CancellationToken.None);
                             count += result.Count;
                         }
 
@@ -95,12 +116,12 @@ namespace ClientData
                 }
                 catch (Exception ex)
                 {
-                    log($"Connection has been broken because of an exception {ex}");
-                    clientWebSocket.CloseAsync(WebSocketCloseStatus.InternalServerError,
-                        "Connection has been broken because of an exception",
-                        CancellationToken.None).Wait();
+                    log($"[ClientMessageLoop] Exception: {ex}");
+                    OnError?.Invoke();
+                    await clientWebSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, "Exception occurred", CancellationToken.None);
                 }
             }
         }
+
     }
 }
