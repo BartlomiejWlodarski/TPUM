@@ -2,18 +2,20 @@
 
 namespace TPUMProject.Presentation.Model
 {
-    internal class ModelBookRepository : IModelBookRepository
+    public class ModelBookRepository
     {
         private IBookService bookService;
+
+        public Action? ModelAllBooksUpdated;
 
         public ModelBookRepository(IBookService bookService)
         {
             this.bookService = bookService;
         }
 
-        public IEnumerable<IModelBook> GetAllBooks()
+        public List<ModelBook> GetAllBooks()
         {
-            return bookService.GetAvailableBooks().Select(book => new ModelBook(book));
+            return bookService.GetAvailableBooks().Select(book => new ModelBook(book)).ToList();
         }
     }
 }

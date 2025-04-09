@@ -5,7 +5,7 @@ using ClientLogic.Abstract;
 
 namespace TPUMProject.Presentation.Model
 {
-    internal class ModelBook : IModelBook,INotifyPropertyChanged
+    public class ModelBook : IModelBook,INotifyPropertyChanged
     {
         public int Id { get; set; }
         public string Title { get; set; }

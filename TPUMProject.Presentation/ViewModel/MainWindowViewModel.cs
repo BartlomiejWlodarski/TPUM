@@ -55,12 +55,12 @@ namespace TPUMProject.Presentation.ViewModel
             ModelLayer.Changed += HandleBookRepositoryChanged;
             ModelLayer.UserChanged += HandleUserChanged;
             ModelLayer.ModelBookRepositoryReplaced += HandleBookRepositoryReplaced;
-            ModelLayer.ModelAllBooksUpdated += GetAllBooks;
-
+            //ModelLayer.ModelAllBooksUpdated += GetAllBooks;
+            ModelLayer.ModelRepository.ModelAllBooksUpdated += GetAllBooks;
 
             OnConnectionStateChange();
 
-            Books = new AsyncObservableCollection<IModelBook>(ModelLayer.ModelRepository.GetAllBooks());
+            Books = new AsyncObservableCollection<ViewModelBook>(ModelLayer.ModelRepository.GetAllBooks().Select(x => new ViewModelBook(x)));
             BooksShow = Books;
             //User = ModelLayer.User;
 
@@ -70,10 +70,28 @@ namespace TPUMProject.Presentation.ViewModel
 
         private void GetAllBooks()
         {
+            RefreshBooks();
             //_booksShow.Clear();
             //_booksShow.AddRange(ModelLayer.ModelRepository.GetAllBooks());
         }
 
+        private void RefreshBooks()
+        {
+            _booksShow.Clear();
+            if (CatalogActive)
+            {
+                _booksShow.AddRange(ModelLayer.ModelRepository.GetAllBooks().Select(x => new ViewModelBook(x)));
+                //ShoppingButtonContent = _shopList;
+                //ButtonVisibility = Visibility.Hidden;
+            }
+            else
+            {
+                //BooksShow = Books;
+                //ShoppingButtonContent = _userList;
+               // ButtonVisibility = Visibility.Visible;
+            }
+
+        }
         public async Task CloseConnection()
         {
             if (ModelLayer.ConnectionService.IsConnected())
@@ -100,13 +118,12 @@ namespace TPUMProject.Presentation.ViewModel
 
         private void HandleBookRepositoryReplaced(object sender, ModelBookRepositoryReplacedEventArgs e)
         {
-            //books.Clear();
-            //Books.AddRange(e.modelBooks);
+            books.Clear();
+            //books.AddRange(e.modelBooks);
         }
 
         private void HandleUserChanged(object sender, ModelUserChangedEventArgs e)
         {
-            Debug.WriteLine("User arrived!");
             User = e.user;
         }
 
@@ -115,24 +132,24 @@ namespace TPUMProject.Presentation.ViewModel
             switch (e.BookChangedEventType)
             {
                 case 0:
-                    Books.Add(e.AffectedBook); //Added
+                    books.Add(new ViewModelBook(e.AffectedBook)); //Added
                         break;
                 
                 case 1:
-                    Books.Remove(Books.Where(book => book.Id == e.AffectedBook.Id).Single()); //Removed
+                    books.Remove(Books.Where(book => book.Id == e.AffectedBook.Id).Single()); //Removed
                     break;
                 
                 case 2:
-                    if (Books.Count == 0) return;
-                    int index = Books.IndexOf(Books.Where(book => book.Id == e.AffectedBook.Id).Single());
-                    if (index < 0 || index >= Books.Count) return;
-                    Books[index] = e.AffectedBook; // Modified
+                    if (books.Count == 0) return;
+                    int index = books.IndexOf(books.Where(book => book.Id == e.AffectedBook.Id).Single());
+                    if (index < 0 || index >= books.Count) return;
+                    books[index] = new ViewModelBook(e.AffectedBook); // Modified
                         break;
             }
         }
 
-        private AsyncObservableCollection<IModelBook> books;
-        public AsyncObservableCollection<IModelBook> Books 
+        private AsyncObservableCollection<ViewModelBook> books;
+        public AsyncObservableCollection<ViewModelBook> Books 
         { 
             get => books;
             private set
@@ -144,8 +161,8 @@ namespace TPUMProject.Presentation.ViewModel
                 }
             }
         }
-        private AsyncObservableCollection<IModelBook> _booksShow;
-        public AsyncObservableCollection<IModelBook> BooksShow
+        private AsyncObservableCollection<ViewModelBook> _booksShow;
+        public AsyncObservableCollection<ViewModelBook> BooksShow
         {
             get => _booksShow;
             private set
@@ -209,7 +226,7 @@ namespace TPUMProject.Presentation.ViewModel
             if(CatalogActive)
             {
                 CatalogActive = false;
-                BooksShow = new AsyncObservableCollection<IModelBook>(User.PurchasedBooks);
+                //BooksShow = new AsyncObservableCollection<IModelBook>(User.PurchasedBooks);
                 ShoppingButtonContent = _shopList;
                 ButtonVisibility = Visibility.Hidden;
             } 

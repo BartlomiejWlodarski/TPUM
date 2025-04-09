@@ -1,4 +1,5 @@
 ﻿using ClientData.Abstract;
+using ClinetAPI;
 using System.Diagnostics;
 
 namespace ClientData
@@ -11,73 +12,74 @@ namespace ClientData
         public event Action? AllBooksUpdated;
         public event EventHandler<BookRepositoryReplacedEventArgs>? BookRepositoryReplacedHandler;
 
-
-        private HashSet<IObserver<BookRepositoryChangedEventArgs>> observers = new HashSet<IObserver<BookRepositoryChangedEventArgs>>();
+        private HashSet<IObserver<BookRepositoryChangedEventArgs>> observers;
 
         private object bookLock = new object();
 
-        public IEnumerable<IBook> GetAllBooks() => _books;
+        IConnectionService connectionService;
 
-        public int CountBooks()
+        public BookRepository(IConnectionService connectionService)
         {
-            return _books.Count;
+            observers = new HashSet<IObserver<BookRepositoryChangedEventArgs>>();
+            this.connectionService = connectionService;
+            this.connectionService.OnMessage += OnMessage;
         }
 
-        public bool RemoveBook(int id)
+        ~BookRepository()
         {
-            lock (bookLock)
+            List<IObserver<BookRepositoryChangedEventArgs>> cachedObservers = observers.ToList();
+            foreach (IObserver<BookRepositoryChangedEventArgs>? observer in cachedObservers)
             {
-                IBook bookToRemove = _books.FirstOrDefault(b => b.Id == id);
-                if (bookToRemove != null)
-                {
-                    _books.Remove(bookToRemove);
-                    BookRepositoryChangedHandler?.Invoke(this, new BookRepositoryChangedEventArgs(bookToRemove, BookRepositoryChangedEventType.Removed));
-                    return true;
-                }
-                return false;
+                observer?.OnCompleted();
             }
         }
 
-        public bool ChangeBook(IBook book)  
+        private void OnMessage(string message)
         {
-            lock (bookLock)
+            Serializer serializer = Serializer.Create();
+
+            if (serializer.GetCommandHeader(message) == BookChangedResponse.StaticHeader)
             {
-                int result = _books.IndexOf(_books.Find(x => x.Id == book.Id));
-                if (result == -1) return false;
-                _books[result] = book;
-                //BookRepositoryChangedHandler?.Invoke(this, new BookRepositoryChangedEventArgs(book, BookRepositoryChangedEventType.Modified));
-                foreach (IObserver<BookRepositoryChangedEventArgs> observer in observers)
+                BookChangedResponse response = serializer.Deserialize<BookChangedResponse>(message);
+                switch (response.changeType)
                 {
-                    observer.OnNext(new BookRepositoryChangedEventArgs(book, BookRepositoryChangedEventType.Modified));
+                    case 0:
+                        AddBook(response.book.ToBook());
+                        break;
+                    case 1:
+                        RemoveBook(response.book.Id);
+                        break;
+                    case 2:
+                        ChangeBook(response.book.ToBook());
+                        break;
+                    default:
+                        break;
                 }
-                return true;
+            }
+            else if (serializer.GetCommandHeader(message) == AllBooksUpdateResponse.StaticHeader)
+            {
+                AllBooksUpdateResponse response = serializer.Deserialize<AllBooksUpdateResponse>(message);
+                UpdateAllBooks(response);
+            }
+            else if (serializer.GetCommandHeader(message) == TransactionResultResponse.StaticHeader)
+            {
+                TransactionResultResponse response = serializer.Deserialize<TransactionResultResponse>(message);
+                //TransactionResult?.Invoke(response.ResultCode);
             }
         }
 
-        public bool AddBook(IBook book)
+        private void UpdateAllBooks(AllBooksUpdateResponse response)
         {
-            lock (bookLock)
-            {
-                IBook? result = _books.Find(x => x.Id == book.Id);
-                if (result == null)
-                {
-                    _books.Add(book);
-                    BookRepositoryChangedHandler?.Invoke(this, new BookRepositoryChangedEventArgs(book, BookRepositoryChangedEventType.Added));
-                    return true;
-                }
-                return false;
-            }
-        }
-
-        public void LoadAllBooks(IEnumerable<IBook> books)
-        {
+            if (response.Books == null) return;
             lock (bookLock)
             {
                 _books.Clear();
-                _books.AddRange(books);
-                BookRepositoryReplacedHandler?.Invoke(this,new BookRepositoryReplacedEventArgs(books));
-                //AllBooksUpdated?.Invoke();
+                foreach (BookDTO book in response.Books)
+                {
+                    _books.Add(book.ToBook());
+                }
             }
+            AllBooksUpdated?.Invoke();
         }
 
         public IDisposable Subscribe(IObserver<BookRepositoryChangedEventArgs> observer)

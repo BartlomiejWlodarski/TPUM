@@ -65,7 +65,7 @@ namespace TPUMProject.Presentation.Model
         public abstract void GetUser(string username);
         public abstract void GetBooks();
 
-        public IModelBookRepository ModelRepository;
+        public ModelBookRepository? ModelRepository { get; private set; }
         public IModelConnectionService ConnectionService;
 
         internal class ModelLayer : ModelAbstractAPI {
@@ -80,7 +80,8 @@ namespace TPUMProject.Presentation.Model
                 _logicLayer.BookService.BookRepositoryReplaced += HandleBookRepositoryReplaced;
                 ModelRepository = new ModelBookRepository(_logicLayer.BookService);
                 ConnectionService = new ModelConnectionService(_logicLayer.GetConnectionService());
-                _logicLayer.BookService.LogicAllBooksUpdated += () => ModelAllBooksUpdated?.Invoke();
+                //_logicLayer.BookService.LogicAllBooksUpdated += () => ModelAllBooksUpdated?.Invoke();
+                _logicLayer.BookService.LogicAllBooksUpdated += () => ModelRepository.ModelAllBooksUpdated?.Invoke();
             }
 
             public override void BuyBook(int id)

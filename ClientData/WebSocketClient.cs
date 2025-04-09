@@ -60,7 +60,7 @@ namespace ClientData
             {
                 try
                 {
-                    byte[] buffer = new byte[4096];
+                    byte[] buffer = new byte[1024];
                     while (true)
                     {
                         ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
@@ -78,7 +78,7 @@ namespace ClientData
                             if(count >= buffer.Length)
                             {
                                 OnClose?.Invoke();
-                                clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing web socket. Buffer size exceeded!", CancellationToken.None).Wait();
+                                clientWebSocket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "Closing web socket. Buffer size exceeded!", CancellationToken.None).Wait();
                                 return;
                             }
 
