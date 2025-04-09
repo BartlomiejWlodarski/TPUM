@@ -13,6 +13,8 @@ namespace TPUMProject.Presentation.ViewModel
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
+        private object itemLock = new object();
+
         private Model.Model ModelLayer;
         private bool CatalogActive = true;
         private IModelUser _user;
