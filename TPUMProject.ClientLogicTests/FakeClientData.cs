@@ -59,6 +59,7 @@ namespace TPUMProject.ClientLogicTests
         private HashSet<IObserver<BookRepositoryChangedEventArgs>> observers;
 
         public event Action? AllBooksUpdated;
+        public event Action<int>? TransactionResult;
         public event EventHandler<BookRepositoryChangedEventArgs>? BookRepositoryChangedHandler;
 
         IConnectionService connectionService;
