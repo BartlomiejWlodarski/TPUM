@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TPUMProject.Presentation.Model
 {
-    internal class ModelConnectionService : IModelConnectionService
+    public class ModelConnectionService
     {
         public event Action<string>? Logger;
         public event Action? OnConnectionStateChanged;

@@ -2,23 +2,16 @@
 {
     public abstract class AbstractDataAPI
     {
-        public event Action<int>? TransactionResult;
-        public abstract IUserContainer User { get; }
-        public abstract IBookRepository BookRepository { get; }
-
-        public abstract int CountBooks();
+        public static AbstractDataAPI Create(IConnectionService connectionService)
+        {
+            return new DataAPI(connectionService);
+        }
+        public abstract void GetUser(string username);
 
         public abstract IConnectionService GetConnectionService();
 
-        public abstract void RequestBooks();
+        public abstract IBookRepository GetBookRepository();
 
-        public abstract void GetUser(string username);
-
-        public abstract void BuyBook(int bookID);
-
-        public static AbstractDataAPI Create(IConnectionService connectionService)
-        {
-            return new DataAPI(connectionService??new ConnectionService());
-        }
+        public abstract IUserContainer GetUserContainer();
     }
 }

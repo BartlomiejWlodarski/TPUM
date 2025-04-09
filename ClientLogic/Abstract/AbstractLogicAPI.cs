@@ -4,20 +4,19 @@ namespace ClientLogic.Abstract
 {
     public abstract class AbstractLogicAPI
     {
-        public abstract IBookService BookService { get; }
-        public abstract IUser User { get; }
+        public AbstractDataAPI DataAPI { get;private set; }
 
-        public static AbstractLogicAPI Create()
+        public AbstractLogicAPI(AbstractDataAPI abstractDataAPI) 
+        { 
+            DataAPI = abstractDataAPI;
+        }
+        public static AbstractLogicAPI Create(AbstractDataAPI? dataAPI = null)
         {
-            AbstractDataAPI dataAPI = AbstractDataAPI.Create(null);
-            return new LogicAPI(dataAPI);
+            AbstractDataAPI abstractData = dataAPI ?? AbstractDataAPI.Create(null);
+            return new LogicAPI(abstractData);
         }
 
-        public static AbstractLogicAPI Create(AbstractDataAPI dataAPI)
-        {
-            return new LogicAPI(dataAPI);
-        }
-
+        public abstract IBookService GetBookService();
         public abstract ILogicUser GetUser();
 
         public abstract ILogicConnectionService GetConnectionService();

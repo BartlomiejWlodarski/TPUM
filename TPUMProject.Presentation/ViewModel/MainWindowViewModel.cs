@@ -1,7 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using TPUMProject.Presentation.Model;
@@ -11,102 +13,81 @@ namespace TPUMProject.Presentation.ViewModel
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-        private ModelAbstractAPI ModelLayer;
+        private Model.Model ModelLayer;
         private bool CatalogActive = true;
         private IModelUser _user;
-        public IModelUser User
-        {
-            get => _user;
-            set
-            {
-                if(value != _user)
-                {
-                    _user = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        private const string _shopList = "Show avaiable books list";
-        private const string _userList = "Show user books list";
-
+        private AsyncObservableCollection<ViewModelBook> books;
+        private AsyncObservableCollection<ViewModelBook> booksShow;
         private string _shoppingButtonContent = _userList;
-        public string ShoppingButtonContent
+        private string _connectionStateString;
+        private Visibility _buttonVisibility = Visibility.Visible;
+        private int selectedIndex = 0;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public MainWindowViewModel()
         {
-            get => _shoppingButtonContent;
-            set
-            {
-                _shoppingButtonContent = value;
-                OnPropertyChanged();
-            }
-        }
-        public ICommand Buy { get; set; }
-        public ICommand ChangeList { get; set; }
+            ModelLayer = new Model.Model(null);
 
-        public MainWindowViewModel() : this(null)
-        { }
+            ModelLayer.ModelConnectionService.OnConnectionStateChanged += () => RunOnUI(OnConnectionStateChange);
+            ModelLayer.ModelConnectionService.OnError += () => RunOnUI(OnConnectionStateChange);
+            ModelLayer.ModelConnectionService.Logger += (message) => RunOnUI(() => Log(message));
+            ModelLayer.ModelConnectionService.OnMessage += (message) => RunOnUI(() => OnMessage(message));
 
-        public MainWindowViewModel(ModelAbstractAPI modelLayerAPI)
-        {
-            ModelLayer = modelLayerAPI == null ? ModelAbstractAPI.CreateModel() : modelLayerAPI;
-            ModelLayer.ConnectionService.OnConnectionStateChanged += OnConnectionStateChange;
-            ModelLayer.ConnectionService.OnError += OnConnectionStateChange;
+            ModelLayer.ModelBookRepository.ModelAllBooksUpdated += () => RunOnUI(HandleOnBooksUpdated);
+            ModelLayer.ModelBookRepository.UserChanged += (sender, e) => RunOnUI(() => HandleUserChanged(sender, e));
+            ModelLayer.ModelBookRepository.BookRepositoryChanged += (sender, e) => RunOnUI(() => HandleBookRepositoryChanged(sender, e));
 
-            ModelLayer.Changed += HandleBookRepositoryChanged;
-            ModelLayer.UserChanged += HandleUserChanged;
-            ModelLayer.ModelBookRepositoryReplaced += HandleBookRepositoryReplaced;
-            ModelLayer.ModelAllBooksUpdated += GetAllBooks;
-
+            Books = new AsyncObservableCollection<ViewModelBook>();
+            BooksShow = Books;
 
             OnConnectionStateChange();
-
-            Books = new AsyncObservableCollection<IModelBook>(ModelLayer.ModelRepository.GetAllBooks());
-            BooksShow = Books;
-            //User = ModelLayer.User;
 
             Buy = new RelayCommand(() => RelayBuy());
             ChangeList = new RelayCommand(() => RelayChangeList());
         }
 
-        private void GetAllBooks()
+        private void RunOnUI(Action action)
         {
-            //_booksShow.Clear();
-            //_booksShow.AddRange(ModelLayer.ModelRepository.GetAllBooks());
-        }
-
-        public async Task CloseConnection()
-        {
-            if (ModelLayer.ConnectionService.IsConnected())
-            {
-                await ModelLayer.ConnectionService.Disconnect();
-            }
+            if (Application.Current.Dispatcher.CheckAccess())
+                action();
+            else
+                Application.Current.Dispatcher.Invoke(action);
         }
 
         private void OnConnectionStateChange()
         {
-            bool connectionState = ModelLayer.ConnectionService.IsConnected();
+            bool connectionState = ModelLayer.ModelConnectionService.IsConnected();
             ConnectionStateString = connectionState ? "Connected" : "Disconnected";
 
             if (connectionState)
             {
                 ModelLayer.GetUser("Marcin");
-                ModelLayer.GetBooks();
+                ModelLayer.ModelBookRepository.RequestUpdate();
             }
             else
             {
-                Task.Run(() => ModelLayer.ConnectionService.Connect(new Uri("ws://localhost:42069/")));
+                Task.Run(() => ModelLayer.ModelConnectionService.Connect(new Uri("ws://localhost:42069/")));
             }
         }
 
-        private void HandleBookRepositoryReplaced(object sender, ModelBookRepositoryReplacedEventArgs e)
+        public void Log(string message)
         {
-            //books.Clear();
-            //Books.AddRange(e.modelBooks);
+            Console.WriteLine(message);
+        }
+
+        public void OnMessage(string message)
+        {
+            Log($"New message: {message}");
+        }
+
+        private void HandleOnBooksUpdated()
+        {
+            RefreshBooks();
         }
 
         private void HandleUserChanged(object sender, ModelUserChangedEventArgs e)
         {
-            Debug.WriteLine("User arrived!");
             User = e.user;
         }
 
@@ -115,25 +96,98 @@ namespace TPUMProject.Presentation.ViewModel
             switch (e.BookChangedEventType)
             {
                 case 0:
-                    Books.Add(e.AffectedBook); //Added
-                        break;
-                
-                case 1:
-                    Books.Remove(Books.Where(book => book.Id == e.AffectedBook.Id).Single()); //Removed
+                    books.Add(new ViewModelBook(e.AffectedBook)); // Added
                     break;
-                
+                case 1:
+                    books.Remove(Books.FirstOrDefault(book => book.Id == e.AffectedBook.Id)); // Removed
+                    break;
                 case 2:
-                    if (Books.Count == 0) return;
-                    int index = Books.IndexOf(Books.Where(book => book.Id == e.AffectedBook.Id).Single());
-                    if (index < 0 || index >= Books.Count) return;
-                    Books[index] = e.AffectedBook; // Modified
-                        break;
+                    var item = Books.FirstOrDefault(book => book.Id == e.AffectedBook.Id);// Modified
+                    if (item != null)
+                    {
+                        int index = Books.IndexOf(item);
+                        if (index >= 0)
+                        {
+                            ViewModelBook book = Books[index];
+                            book.Id = e.AffectedBook.Id;
+                            book.Recommended = e.AffectedBook.Recommended;
+                            book.Title = e.AffectedBook.Title;
+                            book.Author = e.AffectedBook.Author;
+                            book.Price = e.AffectedBook.Price;
+                            book.ChangeBackcolor();
+                        }
+                            
+                    }
+                    break;
+            }
+            if (CatalogActive)
+            {
+                RunOnUI(() => BooksShow = new AsyncObservableCollection<ViewModelBook>(Books));
             }
         }
 
-        private AsyncObservableCollection<IModelBook> books;
-        public AsyncObservableCollection<IModelBook> Books 
-        { 
+        private void RefreshBooks()
+        {
+            Books.Clear();
+            Books.AddRange(ModelLayer.ModelBookRepository.GetAllBooks().Select(x => new ViewModelBook(x)));
+        }
+
+        public async Task CloseConnection()
+        {
+            if (ModelLayer.ModelConnectionService.IsConnected())
+            {
+                await ModelLayer.ModelConnectionService.Disconnect();
+            }
+        }
+
+        private void RelayBuy()
+        {
+            if (selectedIndex >= 0 && selectedIndex < Books.Count)
+            {
+                Task.Run(async () => await ModelLayer.SellBook(Books[selectedIndex].Id));
+            }
+        }
+
+        private void RelayChangeList()
+        {
+            if (CatalogActive)
+            {
+                CatalogActive = false;
+                BooksShow = new AsyncObservableCollection<ViewModelBook>(User.PurchasedBooks.Select(x => new ViewModelBook(x)));
+                ShoppingButtonContent = _shopList;
+                ButtonVisibility = Visibility.Hidden;
+            }
+            else
+            {
+                CatalogActive = true;
+                BooksShow = new AsyncObservableCollection<ViewModelBook>(Books);
+                ShoppingButtonContent = _userList;
+                ButtonVisibility = Visibility.Visible;
+            }
+        }
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        // === Public Properties ===
+
+        public IModelUser User
+        {
+            get => _user;
+            set
+            {
+                if (value != _user)
+                {
+                    _user = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public AsyncObservableCollection<ViewModelBook> Books
+        {
             get => books;
             private set
             {
@@ -144,55 +198,45 @@ namespace TPUMProject.Presentation.ViewModel
                 }
             }
         }
-        private AsyncObservableCollection<IModelBook> _booksShow;
-        public AsyncObservableCollection<IModelBook> BooksShow
+
+        public AsyncObservableCollection<ViewModelBook> BooksShow
         {
-            get => _booksShow;
+            get => booksShow;
             private set
             {
-                if (_booksShow != value)
+                if (booksShow != value)
                 {
-                    _booksShow = value;
-                    OnPropertyChanged("BooksShow");
+                    booksShow = value;
+                    OnPropertyChanged();
                 }
             }
         }
 
-        private string _connectionStateString;
+        public string ShoppingButtonContent
+        {
+            get => _shoppingButtonContent;
+            set
+            {
+                _shoppingButtonContent = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ICommand Buy { get; set; }
+        public ICommand ChangeList { get; set; }
 
         public string ConnectionStateString
         {
             get => _connectionStateString;
             set
             {
-                if(value != _connectionStateString)
+                if (value != _connectionStateString)
                 {
                     _connectionStateString = value;
                     OnPropertyChanged();
                 }
             }
         }
-
-        private int selectedIndex = 0;
-
-        public int SelectedIndex
-        {
-            get { return selectedIndex; }
-            set
-            {
-                selectedIndex = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private void RelayBuy()
-        {
-            if(selectedIndex >= 0 && selectedIndex < Books.Count)ModelLayer.BuyBook(Books[selectedIndex].Id);
-        }
-
-        private Visibility _buttonVisibility = Visibility.Visible;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public Visibility ButtonVisibility
         {
@@ -204,27 +248,17 @@ namespace TPUMProject.Presentation.ViewModel
             }
         }
 
-        private void RelayChangeList()
+        public int SelectedIndex
         {
-            if(CatalogActive)
+            get { return selectedIndex; }
+            set
             {
-                CatalogActive = false;
-                BooksShow = new AsyncObservableCollection<IModelBook>(User.PurchasedBooks);
-                ShoppingButtonContent = _shopList;
-                ButtonVisibility = Visibility.Hidden;
-            } 
-            else
-            {
-                CatalogActive = true;
-                BooksShow = Books;
-                ShoppingButtonContent = _userList;
-                ButtonVisibility = Visibility.Visible;
+                selectedIndex = value;
+                OnPropertyChanged();
             }
         }
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        private const string _shopList = "Show avaiable books list";
+        private const string _userList = "Show user books list";
     }
 }

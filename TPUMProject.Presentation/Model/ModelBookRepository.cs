@@ -1,19 +1,49 @@
 ﻿using ClientLogic.Abstract;
+using System.Diagnostics;
 
 namespace TPUMProject.Presentation.Model
 {
-    internal class ModelBookRepository : IModelBookRepository
+    public class ModelBookRepository
     {
-        private IBookService bookService;
+        private IBookService bookService {  get; set; }
+
+        public event EventHandler<ModelBookRepositoryChangedEventArgs>? BookRepositoryChanged;
+        public event EventHandler<ModelUserChangedEventArgs>? UserChanged;
+        public event Action? ModelAllBooksUpdated;
 
         public ModelBookRepository(IBookService bookService)
         {
             this.bookService = bookService;
+
+            bookService.LogicAllBooksUpdated += () => ModelAllBooksUpdated?.Invoke();
+            bookService.UserChanged += HandleUserChanged;
+            bookService.BookRepositoryChanged += HandleBookRepositoryChanged;
         }
 
-        public IEnumerable<IModelBook> GetAllBooks()
+        private void HandleBookRepositoryChanged(object sender, LogicBookRepositoryChangedEventArgs e)
         {
-            return bookService.GetAvailableBooks().Select(book => new ModelBook(book));
+            BookRepositoryChanged?.Invoke(this, new ModelBookRepositoryChangedEventArgs(e));
+        }
+
+        private void HandleUserChanged(object sender, LogicUserChangedEventArgs e)
+        {
+            UserChanged?.Invoke(this,new ModelUserChangedEventArgs(e));
+        }
+
+        public void RequestUpdate()
+        {
+            bookService.RequestUpdate();
+        }
+
+        public List<ModelBook> GetAllBooks()
+        {
+            return bookService.GetAllBooks().Select(book => new ModelBook(book)).ToList();
+        }
+
+        public ModelBook? GetBookById(int id)
+        {
+            ILogicBook? result = bookService.GetBookByID(id);
+            return result == null ? null : new ModelBook(result);
         }
     }
 }

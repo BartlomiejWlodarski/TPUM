@@ -4,18 +4,14 @@
     {
         public event EventHandler<BookRepositoryChangedEventArgs> BookRepositoryChangedHandler;
         public event Action? AllBooksUpdated;
-        public event EventHandler<BookRepositoryReplacedEventArgs> BookRepositoryReplacedHandler;
 
-        IEnumerable<IBook> GetAllBooks();
-        public abstract int CountBooks();
-        bool RemoveBook(int id);
-        bool ChangeBook(IBook book);
+        public void RequestUpdate();
 
-        bool AddBook(IBook book);
+        public Task SellBook(int id, string username);
 
-        void LoadAllBooks(IEnumerable<IBook> books);
+        public List<IBook> GetAllBooks();
 
-
+        public IBook? GetBookByID(int bookID);
     }
 
     public enum BookRepositoryChangedEventType

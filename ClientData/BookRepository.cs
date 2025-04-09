@@ -1,4 +1,5 @@
 ﻿using ClientData.Abstract;
+using ClinetAPI;
 using System.Diagnostics;
 
 namespace ClientData
@@ -6,78 +7,159 @@ namespace ClientData
     internal class BookRepository : IBookRepository
     {
         private readonly List<IBook> _books = new();
-
-        public event EventHandler<BookRepositoryChangedEventArgs>? BookRepositoryChangedHandler;
-        public event Action? AllBooksUpdated;
-        public event EventHandler<BookRepositoryReplacedEventArgs>? BookRepositoryReplacedHandler;
-
-
-        private HashSet<IObserver<BookRepositoryChangedEventArgs>> observers = new HashSet<IObserver<BookRepositoryChangedEventArgs>>();
-
         private object bookLock = new object();
 
-        public IEnumerable<IBook> GetAllBooks() => _books;
+        private HashSet<IObserver<BookRepositoryChangedEventArgs>> observers;
 
-        public int CountBooks()
+        public event Action? AllBooksUpdated;
+        public event EventHandler<BookRepositoryChangedEventArgs>? BookRepositoryChangedHandler;
+
+        IConnectionService connectionService;
+
+        public BookRepository(IConnectionService connectionService)
         {
-            return _books.Count;
+            observers = new HashSet<IObserver<BookRepositoryChangedEventArgs>>();
+            this.connectionService = connectionService;
+            this.connectionService.OnMessage += OnMessage;
         }
 
-        public bool RemoveBook(int id)
+        ~BookRepository()
         {
-            lock (bookLock)
+            List<IObserver<BookRepositoryChangedEventArgs>> cachedObservers = observers.ToList();
+            foreach (IObserver<BookRepositoryChangedEventArgs>? observer in cachedObservers)
             {
-                IBook bookToRemove = _books.FirstOrDefault(b => b.Id == id);
-                if (bookToRemove != null)
-                {
-                    _books.Remove(bookToRemove);
-                    BookRepositoryChangedHandler?.Invoke(this, new BookRepositoryChangedEventArgs(bookToRemove, BookRepositoryChangedEventType.Removed));
-                    return true;
-                }
-                return false;
+                observer?.OnCompleted();
             }
         }
 
-        public bool ChangeBook(IBook book)  
+        private void OnMessage(string message)
         {
-            lock (bookLock)
+            Serializer serializer = Serializer.Create();
+
+            if (serializer.GetCommandHeader(message) == BookChangedResponse.StaticHeader)
             {
-                int result = _books.IndexOf(_books.Find(x => x.Id == book.Id));
-                if (result == -1) return false;
-                _books[result] = book;
-                //BookRepositoryChangedHandler?.Invoke(this, new BookRepositoryChangedEventArgs(book, BookRepositoryChangedEventType.Modified));
-                foreach (IObserver<BookRepositoryChangedEventArgs> observer in observers)
+                BookChangedResponse response = serializer.Deserialize<BookChangedResponse>(message);
+                IBook book = response.book.ToBook();
+                switch (response.changeType)
                 {
-                    observer.OnNext(new BookRepositoryChangedEventArgs(book, BookRepositoryChangedEventType.Modified));
+                    case 0:
+                        AddBook(book);
+                        BookRepositoryChangedHandler?.Invoke(this,new BookRepositoryChangedEventArgs(book, BookRepositoryChangedEventType.Added));
+                        break;
+                    case 1:
+                        RemoveBook(book.Id);
+                        BookRepositoryChangedHandler?.Invoke(this, new BookRepositoryChangedEventArgs(book, BookRepositoryChangedEventType.Removed));
+                        break;
+                    case 2:
+                        ReplaceBook(book);
+                        //BookRepositoryChangedHandler?.Invoke(this, new BookRepositoryChangedEventArgs(book, BookRepositoryChangedEventType.Modified));
+                        break;
+                    default:
+                        break;
                 }
-                return true;
+            }
+            else if (serializer.GetCommandHeader(message) == AllBooksUpdateResponse.StaticHeader)
+            {
+                AllBooksUpdateResponse response = serializer.Deserialize<AllBooksUpdateResponse>(message);
+                UpdateAllBooks(response);
+            }
+            else if (serializer.GetCommandHeader(message) == TransactionResultResponse.StaticHeader)
+            {
+                TransactionResultResponse response = serializer.Deserialize<TransactionResultResponse>(message);
+                //TransactionResult?.Invoke(response.ResultCode);
             }
         }
 
-        public bool AddBook(IBook book)
+        public async Task RequestBooks()
         {
-            lock (bookLock)
+            Serializer serializer = Serializer.Create();
+            await connectionService.SendAsync(serializer.Serialize(new GetBooksCommand()));
+        }
+
+        public async Task SellBook(int id, string username)
+        {
+            if (connectionService.IsConnected())
             {
-                IBook? result = _books.Find(x => x.Id == book.Id);
-                if (result == null)
-                {
-                    _books.Add(book);
-                    BookRepositoryChangedHandler?.Invoke(this, new BookRepositoryChangedEventArgs(book, BookRepositoryChangedEventType.Added));
-                    return true;
-                }
-                return false;
+                Serializer serializer = Serializer.Create();
+                SellBookCommand command = new SellBookCommand(id, username);
+                await connectionService.SendAsync(serializer.Serialize<SellBookCommand>(command));
             }
         }
 
-        public void LoadAllBooks(IEnumerable<IBook> books)
+        public void RequestUpdate()
         {
+            if (connectionService.IsConnected())
+            {
+                Task task = Task.Run(async () => await RequestBooks());
+            }
+        }
+
+
+        public List<IBook> GetAllBooks()
+        {
+            List<IBook> books = new List<IBook> ();
+            lock (bookLock)
+            {
+                books.AddRange (_books.Select(book => (IBook)book.Clone()));
+            }
+            return books;
+        }
+
+        public void ReplaceBook(IBook replacement)
+        {
+            lock (bookLock)
+            {
+                int index = _books.FindIndex(book => book.Id == replacement.Id);
+                if(index > -1 && index < _books.Count)
+                {
+                    _books[index] = replacement;
+                }
+            }
+
+            foreach(IObserver<BookRepositoryChangedEventArgs>? observer in observers)
+            {
+                observer.OnNext(new BookRepositoryChangedEventArgs(replacement, BookRepositoryChangedEventType.Modified));
+            }
+        }
+
+        public void AddBook(IBook book)
+        {
+            lock (bookLock)
+            {
+                _books.Add(book);
+            }
+        }
+
+        public void RemoveBook(int bookID)
+        {
+            lock (bookLock)
+            {
+                _books.RemoveAll(x => x.Id == bookID);
+            }
+        }
+
+        public IBook? GetBookByID(int bookID)
+        {
+            IBook? result = null;
+            lock (bookLock)
+            {
+                result = _books.Find(x => x.Id == bookID);
+            }
+            return result;
+        }
+
+        private void UpdateAllBooks(AllBooksUpdateResponse response)
+        {
+            if (response.Books == null) return;
             lock (bookLock)
             {
                 _books.Clear();
-                _books.AddRange(books);
-                BookRepositoryReplacedHandler?.Invoke(this,new BookRepositoryReplacedEventArgs(books));
-                //AllBooksUpdated?.Invoke();
+                foreach (BookDTO book in response.Books)
+                {
+                    _books.Add(book.ToBook());
+                }
             }
+            AllBooksUpdated?.Invoke();
         }
 
         public IDisposable Subscribe(IObserver<BookRepositoryChangedEventArgs> observer)

@@ -27,8 +27,9 @@ namespace ClinetAPI
         public static string StaticHeader = "SellBook";
 
         public int BookID;
-        public string Username;
+        public string Username = "";
 
+        public SellBookCommand() : base(StaticHeader) { }
         public SellBookCommand(int id, string username) : base(StaticHeader) 
         {
             BookID = id;
