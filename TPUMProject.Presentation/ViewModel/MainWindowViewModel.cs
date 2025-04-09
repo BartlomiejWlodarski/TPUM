@@ -51,10 +51,16 @@ namespace TPUMProject.Presentation.ViewModel
 
         private void RunOnUI(Action action)
         {
-            if (Application.Current.Dispatcher.CheckAccess())
+            var app = Application.Current;
+            if (app == null || app.Dispatcher == null || app.Dispatcher.HasShutdownStarted || app.Dispatcher.HasShutdownFinished)
+            {
+                return;
+            }
+
+            if (app.Dispatcher.CheckAccess())
                 action();
             else
-                Application.Current.Dispatcher.Invoke(action);
+                app.Dispatcher.Invoke(action);
         }
 
         private void OnConnectionStateChange()
