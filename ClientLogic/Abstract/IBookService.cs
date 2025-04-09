@@ -7,6 +7,7 @@ namespace ClientLogic.Abstract
         public event EventHandler<LogicBookRepositoryChangedEventArgs> BookRepositoryChanged;
         public event EventHandler<LogicUserChangedEventArgs> UserChanged;
         public event Action? LogicAllBooksUpdated;
+        public event Action<int>? TransactionResult;
 
         public void RequestUpdate();
 

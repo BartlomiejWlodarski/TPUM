@@ -20,6 +20,7 @@ namespace TPUMProject.Presentation.ViewModel
         private AsyncObservableCollection<ViewModelBook> booksShow;
         private string _shoppingButtonContent = _userList;
         private string _connectionStateString;
+        private string _transactionResultString;
         private Visibility _buttonVisibility = Visibility.Visible;
         private int selectedIndex = 0;
 
@@ -37,6 +38,7 @@ namespace TPUMProject.Presentation.ViewModel
             ModelLayer.ModelBookRepository.ModelAllBooksUpdated += () => RunOnUI(HandleOnBooksUpdated);
             ModelLayer.ModelBookRepository.UserChanged += (sender, e) => RunOnUI(() => HandleUserChanged(sender, e));
             ModelLayer.ModelBookRepository.BookRepositoryChanged += (sender, e) => RunOnUI(() => HandleBookRepositoryChanged(sender, e));
+            ModelLayer.ModelBookRepository.TransactionResult += (int code) => RunOnUI(() => ReceiveTransactionCode(code));
 
             Books = new AsyncObservableCollection<ViewModelBook>();
             BooksShow = Books;
@@ -123,6 +125,28 @@ namespace TPUMProject.Presentation.ViewModel
             if (CatalogActive)
             {
                 RunOnUI(() => BooksShow = new AsyncObservableCollection<ViewModelBook>(Books));
+            }
+        }
+
+        private void ReceiveTransactionCode(int code)
+        {
+            switch (code)
+            {
+                case 0:
+                    TransactionResultString = "Success";
+                    break;
+                case 1:
+                    TransactionResultString = "Money error";
+                    break;
+                case 2:
+                    TransactionResultString = "Book missing";
+                    break;
+                case 3:
+                    TransactionResultString = "Invalid user";
+                    break ;  
+                default:
+                    TransactionResultString = "Uknown error";
+                    break;
             }
         }
 
@@ -224,6 +248,19 @@ namespace TPUMProject.Presentation.ViewModel
 
         public ICommand Buy { get; set; }
         public ICommand ChangeList { get; set; }
+
+        public string TransactionResultString
+        {
+            get => _transactionResultString;
+            set
+            {
+                if(value != _transactionResultString)
+                {
+                    _transactionResultString = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public string ConnectionStateString
         {

@@ -12,6 +12,7 @@ namespace ClientLogic
         public event EventHandler<LogicBookRepositoryChangedEventArgs>? BookRepositoryChanged;
         public event EventHandler<LogicUserChangedEventArgs>? UserChanged;
         public event Action? LogicAllBooksUpdated;
+        public event Action<int>? TransactionResult;
 
         private IDisposable BookRepoHandle;
 
@@ -23,6 +24,7 @@ namespace ClientLogic
             BookRepoHandle = _bookRepository.Subscribe(this);
 
             _bookRepository.AllBooksUpdated += () => LogicAllBooksUpdated?.Invoke();
+            _bookRepository.TransactionResult += (int code) => TransactionResult?.Invoke(code);
             _bookRepository.BookRepositoryChangedHandler += HandleOnBookRepositoryChanged;
             _dataAPI.GetUserContainer().UserChanged += HandleOnUserChanged;
         }
