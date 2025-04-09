@@ -1,4 +1,5 @@
-﻿using ClientData.Abstract;
+﻿using ClientData;
+using ClientData.Abstract;
 using ClinetAPI;
 using System.Text.Json.Nodes;
 
@@ -52,48 +53,18 @@ namespace TPUMProject.ClientDataTests
         public int lastBoughtId;
         public int nextId = 5;
 
-        public void MockUpdateAll(BookDTO[] books)
+        public void MockUpdateAllBooks(BookDTO[] books)
         {
             AllBooksUpdateResponse response = new AllBooksUpdateResponse();
             response.Books = books;
             OnMessage?.Invoke(serializer.Serialize(response));
         }
-    }
 
-    public abstract class Serializer
-    {
-        public abstract string Serialize<T>(T toSerialize);
-        public abstract T Deserialize<T>(string json);
-
-        public abstract string? GetCommandHeader(string command);
-
-        public static Serializer Create()
+        public void MockUpdateUser(UserDTO user)
         {
-            return new JsonSerializer();
-        }
-
-    }
-
-    internal class JsonSerializer : Serializer
-    {
-        public override T Deserialize<T>(string json)
-        {
-            return System.Text.Json.JsonSerializer.Deserialize<T>(json);
-        }
-
-        public override string? GetCommandHeader(string command)
-        {
-            JsonObject jsonObj = JsonObject.Parse(command).AsObject();
-            if (jsonObj.ContainsKey("Header"))
-            {
-                return (string)jsonObj["Header"];
-            }
-            return null;
-        }
-
-        public override string Serialize<T>(T toSerialize)
-        {
-            return System.Text.Json.JsonSerializer.Serialize<T>(toSerialize);
+            UserChangedResponse response = new UserChangedResponse();
+            response.User = user;
+            OnMessage?.Invoke(serializer.Serialize(response));
         }
     }
 }
