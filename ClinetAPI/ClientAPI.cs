@@ -1,6 +1,4 @@
-﻿
-
-namespace ClinetAPI
+﻿namespace ClientAPI
 {
     [Serializable]
     public abstract class ServerCommand

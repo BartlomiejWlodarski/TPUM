@@ -1,4 +1,4 @@
-﻿using ClinetAPI;
+﻿using ClientAPI;
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;

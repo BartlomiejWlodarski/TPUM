@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ClientLogic\ClientLogic.csproj" />
+    <ProjectReference Include="..\ClientLogic\TPUMProject.ClientLogic.csproj" />
   </ItemGroup>
 
   <ItemGroup>

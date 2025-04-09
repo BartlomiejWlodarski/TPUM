@@ -1,5 +1,5 @@
 ﻿using ClientData.Abstract;
-using ClinetAPI;
+using ClientAPI;
 using System.Net.WebSockets;
 
 namespace TPUMProject.ClientLogicTests

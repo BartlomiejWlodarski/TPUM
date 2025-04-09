@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ClinetAPI\ClinetAPI.csproj" />
+    <ProjectReference Include="..\ClinetAPI\TPUMProject.ClientAPI.csproj" />
     <ProjectReference Include="..\TPUMProject.Logic\TPUMProject.ServerLogic.csproj" />
   </ItemGroup>
 

@@ -1,6 +1,6 @@
 ﻿using ClientData;
 using ClientData.Abstract;
-using ClinetAPI;
+using ClientAPI;
 using System.Text.Json.Nodes;
 
 namespace TPUMProject.ClientDataTests

@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ClientData\ClientData.csproj" />
+    <ProjectReference Include="..\ClientData\TPUMProject.ClientData.csproj" />
   </ItemGroup>
 
   <ItemGroup>

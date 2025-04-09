@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ClinetAPI\ClinetAPI.csproj" />
+    <ProjectReference Include="..\ClientData\TPUMProject.ClientData.csproj" />
   </ItemGroup>
 
 </Project>

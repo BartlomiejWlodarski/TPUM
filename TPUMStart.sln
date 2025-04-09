@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.ServerData", "T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.ServerLogic", "TPUMProject.Logic\TPUMProject.ServerLogic.csproj", "{18A3D4D5-004A-4E67-88BC-3461A9A6BA05}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.Presentation", "TPUMProject.Presentation\TPUMProject.Presentation.csproj", "{45856F6A-F931-46C5-B038-1C345B8BFBE2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.ClientPresentation", "TPUMProject.Presentation\TPUMProject.ClientPresentation.csproj", "{45856F6A-F931-46C5-B038-1C345B8BFBE2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.Tests", "TPUMProject.Tests\TPUMProject.Tests.csproj", "{CFE2157E-9818-4BAB-8B68-DE9FFFB81899}"
 EndProject
@@ -16,21 +16,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerPresentation", "ServerPresentation\ServerPresentation.csproj", "{2B8D4BBF-C673-4BFF-9B96-B3B9B377E69E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.ServerPresentation", "ServerPresentation\TPUMProject.ServerPresentation.csproj", "{2B8D4BBF-C673-4BFF-9B96-B3B9B377E69E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientData", "ClientData\ClientData.csproj", "{E518ECD3-1D5C-4E5E-A662-4EE6317665AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.ClientData", "ClientData\TPUMProject.ClientData.csproj", "{E518ECD3-1D5C-4E5E-A662-4EE6317665AD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientLogic", "ClientLogic\ClientLogic.csproj", "{9FCB84A4-9EF5-418F-B9A5-5788068C71E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.ClientLogic", "ClientLogic\TPUMProject.ClientLogic.csproj", "{9FCB84A4-9EF5-418F-B9A5-5788068C71E7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClinetAPI", "ClinetAPI\ClinetAPI.csproj", "{8DB450BF-3DC8-48F5-BDA1-693F278F498B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.ClientAPI", "ClinetAPI\TPUMProject.ClientAPI.csproj", "{8DB450BF-3DC8-48F5-BDA1-693F278F498B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPUMProject.ClientDataTests", "TPUMProject.ClientDataTests\TPUMProject.ClientDataTests.csproj", "{BD11D8C0-A74C-409A-B98F-A1E12A792AA4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.ClientDataTests", "TPUMProject.ClientDataTests\TPUMProject.ClientDataTests.csproj", "{BD11D8C0-A74C-409A-B98F-A1E12A792AA4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPUMProject.ClientLogicTests", "TPUMProject.ClientLogicTests\TPUMProject.ClientLogicTests.csproj", "{5A4B897E-F448-4DBE-B610-51DF68BC7EC1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.ClientLogicTests", "TPUMProject.ClientLogicTests\TPUMProject.ClientLogicTests.csproj", "{5A4B897E-F448-4DBE-B610-51DF68BC7EC1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPUMProject.ServerDataTests", "TPUMProject.ServerDataTests\TPUMProject.ServerDataTests.csproj", "{CE8874A5-75C5-4B53-B55D-DE17958344B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.ServerDataTests", "TPUMProject.ServerDataTests\TPUMProject.ServerDataTests.csproj", "{CE8874A5-75C5-4B53-B55D-DE17958344B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TPUMProject.ServerLogicTests", "TPUMProject.ServerLogicTests\TPUMProject.ServerLogicTests.csproj", "{7C63BB68-5974-4B16-8CB8-59DF4EB32113}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TPUMProject.ServerLogicTests", "TPUMProject.ServerLogicTests\TPUMProject.ServerLogicTests.csproj", "{7C63BB68-5974-4B16-8CB8-59DF4EB32113}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
