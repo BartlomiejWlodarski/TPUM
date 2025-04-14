@@ -1,5 +1,5 @@
 ﻿using ClientData.Abstract;
-using ClientAPI;
+using ConnectionAPI;
 using System.Diagnostics;
 
 namespace ClientData
@@ -37,7 +37,7 @@ namespace ClientData
         {
             Serializer serializer = Serializer.Create();
 
-            if(serializer.GetCommandHeader(message) == UserChangedResponse.StaticHeader)
+            if(serializer.GetCommandHeader(message) == ServerStatics.UserChangedResponseHeader)
             {
                 UserChangedResponse response = serializer.Deserialize<UserChangedResponse>(message);
                 if(_userContainer.user == null || _userContainer.user.Name == response.User.Username)
@@ -58,7 +58,12 @@ namespace ClientData
         private async Task RequestGetUser(string username)
         {
             Serializer serializer = Serializer.Create();
-            await _connectionService.SendAsync(serializer.Serialize(new GetUserCommand(username)));
+            await _connectionService.SendAsync(serializer.Serialize(new GetUserCommand
+            {
+                Header = ServerStatics.GetUserCommandHeader,
+                Username = username
+            }
+            ));
         }
     }
 }

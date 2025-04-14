@@ -1,5 +1,5 @@
 ﻿using ClientData.Abstract;
-using ClientAPI;
+using ConnectionAPI;
 using System.Diagnostics;
 
 namespace ClientData
@@ -37,11 +37,11 @@ namespace ClientData
         {
             Serializer serializer = Serializer.Create();
 
-            if (serializer.GetCommandHeader(message) == BookChangedResponse.StaticHeader)
+            if (serializer.GetCommandHeader(message) == ServerStatics.BookChangedResponseHeader)
             {
                 BookChangedResponse response = serializer.Deserialize<BookChangedResponse>(message);
-                IBook book = response.book.ToBook();
-                switch (response.changeType)
+                IBook book = response.Book.ToBook();
+                switch (response.ChangeType)
                 {
                     case 0:
                         AddBook(book);
@@ -59,12 +59,12 @@ namespace ClientData
                         break;
                 }
             }
-            else if (serializer.GetCommandHeader(message) == AllBooksUpdateResponse.StaticHeader)
+            else if (serializer.GetCommandHeader(message) == ServerStatics.AllBooksUpdateResponseHeader)
             {
                 AllBooksUpdateResponse response = serializer.Deserialize<AllBooksUpdateResponse>(message);
                 UpdateAllBooks(response);
             }
-            else if (serializer.GetCommandHeader(message) == TransactionResultResponse.StaticHeader)
+            else if (serializer.GetCommandHeader(message) == ServerStatics.TransactionResultResponseHeader)
             {
                 TransactionResultResponse response = serializer.Deserialize<TransactionResultResponse>(message);
                 TransactionResult?.Invoke(response.ResultCode);
@@ -82,7 +82,12 @@ namespace ClientData
             if (connectionService.IsConnected())
             {
                 Serializer serializer = Serializer.Create();
-                SellBookCommand command = new SellBookCommand(id, username);
+                SellBookCommand command = new SellBookCommand
+                {
+                    Header = ServerStatics.SellBookCommandHeader,
+                    BookID = id,
+                    Username = username
+                };
                 await connectionService.SendAsync(serializer.Serialize<SellBookCommand>(command));
             }
         }
