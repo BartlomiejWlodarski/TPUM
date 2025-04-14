@@ -74,7 +74,7 @@ namespace ClientData
         public async Task RequestBooks()
         {
             Serializer serializer = Serializer.Create();
-            await connectionService.SendAsync(serializer.Serialize(new GetBooksCommand()));
+            await connectionService.SendAsync(serializer.Serialize(new GetBooksCommand { Header = ServerStatics.GetBooksCommandHeader}));
         }
 
         public async Task SellBook(int id, string username)

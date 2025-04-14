@@ -56,13 +56,13 @@ namespace ClientData
                     catch (Exception ex)
                     {
                         log($"[SendTask] Error while sending: {ex}");
-                        OnError?.Invoke();
+                        OnError?.Invoke(Guid.Empty);
                     }
                 }
                 else
                 {
                     log($"[SendTask] WebSocket is not open. Current state: {clientWebSocket.State}");
-                    OnError?.Invoke();
+                    OnError?.Invoke(Guid.Empty);
                 }
             }
 
@@ -73,7 +73,7 @@ namespace ClientData
                     await clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Shutdown procedure started", CancellationToken.None);
                 }
                 clientWebSocket.Dispose();
-                OnClose?.Invoke();
+                OnClose?.Invoke(Guid.Empty);
             }
 
             public override string ToString() => peer.ToString();
@@ -91,7 +91,7 @@ namespace ClientData
                         if (result.MessageType == WebSocketMessageType.Close)
                         {
                             await clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client closing", CancellationToken.None);
-                            OnClose?.Invoke();
+                            OnClose?.Invoke(Guid.Empty);
                             return;
                         }
 
@@ -101,7 +101,7 @@ namespace ClientData
                             if (count >= buffer.Length)
                             {
                                 await clientWebSocket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "Too long message", CancellationToken.None);
-                                OnClose?.Invoke();
+                                OnClose?.Invoke(Guid.Empty);
                                 return;
                             }
 
@@ -111,13 +111,13 @@ namespace ClientData
                         }
 
                         string message = Encoding.UTF8.GetString(buffer, 0, count);
-                        OnMessage?.Invoke(message);
+                        OnMessage?.Invoke(message, Guid.Empty);
                     }
                 }
                 catch (Exception ex)
                 {
                     log($"[ClientMessageLoop] Exception: {ex}");
-                    OnError?.Invoke();
+                    OnError?.Invoke(Guid.Empty);
                     await clientWebSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, "Exception occurred", CancellationToken.None);
                 }
             }

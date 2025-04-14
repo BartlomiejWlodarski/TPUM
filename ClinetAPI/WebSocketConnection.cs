@@ -8,9 +8,11 @@ namespace ConnectionAPI
 {
     public abstract class WebSocketConnection
     {
-        public virtual Action<string>? OnMessage { set; protected get; } = x => { };
-        public virtual Action? OnClose { set; protected get; } = () => { };
-        public virtual Action? OnError { set; protected get; } = () => { };
+        public virtual Action<string,Guid>? OnMessage { set; protected get; } = (x, y) => { };
+        public virtual Action<Guid>? OnClose { set; protected get; } = (x) => { };
+        public virtual Action<Guid>? OnError { set; protected get; } = (x) => { };
+
+        public virtual Guid connectionID {protected set; get; }
 
         public async Task SendAsync(string message)
         {

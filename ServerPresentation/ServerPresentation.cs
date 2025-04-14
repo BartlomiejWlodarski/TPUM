@@ -11,9 +11,8 @@ namespace ServerPresentation
     internal class ServerPresentation
     {
         private readonly AbstractLogicAPI logicAPI;
-        private WebSocketConnection? connection;
 
-        object connectionLock = new object();
+        private Dictionary<Guid, WebSocketConnection> connections = new();
 
         private ServerPresentation(AbstractLogicAPI logicAPI)
         {
@@ -39,12 +38,12 @@ namespace ServerPresentation
             connection.OnClose = OnClose;
             connection.OnError = OnError;
 
-            this.connection = connection;
+            connections.TryAdd(connection.connectionID, connection);
         }
 
-        private async void OnMessage(string message)
+        private async void OnMessage(string message, Guid connectionID)
         {
-            if(connection == null) return;
+            if (!connections.TryGetValue(connectionID, out WebSocketConnection? connection) || connection == null) return;
 
             Console.WriteLine("Message received: " + message);
 
@@ -65,18 +64,18 @@ namespace ServerPresentation
             else if(serializer.GetCommandHeader(message) == GetBooksCommand.StaticHeader)
             {
                 GetBooksCommand sellBook = serializer.Deserialize<GetBooksCommand>(message);
-                await SendBooks();
+                await SendBooks(connectionID);
             }
             else if(serializer.GetCommandHeader(message) == GetUserCommand.StaticHeader)
             {
                 GetUserCommand userCommand = serializer.Deserialize<GetUserCommand>(message);
-                await SendUser(userCommand.Username);
+                await SendUser(userCommand.Username,connectionID);
             }
         }
 
-        private async Task SendUser(string username)
+        private async Task SendUser(string username, Guid connectionID)
         {
-            if (connection == null) return;
+            if (!connections.TryGetValue(connectionID, out WebSocketConnection? connection) || connection == null) return;
 
             Console.WriteLine("Sending user data...");
 
@@ -90,9 +89,9 @@ namespace ServerPresentation
             await connection.SendAsync(json);
         }
 
-        private async Task SendBooks()
+        private async Task SendBooks(Guid connectionID)
         {
-            if(connection == null) return;
+            if(!connections.TryGetValue(connectionID, out WebSocketConnection? connection) || connection == null) return;
 
             Console.WriteLine("Sending books' data...");
 
@@ -109,7 +108,7 @@ namespace ServerPresentation
 
         private async void HandleBookRepositoryChanged(object sender, LogicBookRepositoryChangedEventArgs e)
         {
-            if(connection == null) return;
+            if(connections.Count == 0) return;
 
             Console.WriteLine("Changed book n.o: " + e.AffectedBook.Id);
 
@@ -120,12 +119,15 @@ namespace ServerPresentation
             string json = serializer.Serialize(bookChangedResponse);
             Console.WriteLine(json);
 
-            await connection.SendAsync(json);
+            foreach(var connection in connections)
+            {
+                await connection.Value.SendAsync(json);
+            }
         }
 
         private async void HandleUserChanged(object sender, LogicUserChangedEventArgs e)
         {
-            if(connection == null) return;
+            if(connections.Count == 0) return;
 
             Console.WriteLine("User changed: " + e.user.Name);
 
@@ -136,18 +138,21 @@ namespace ServerPresentation
             string json = serializer.Serialize(userChangedResponse);
             Console.WriteLine(json);
 
-            await connection.SendAsync(json);
+            foreach (var connection in connections)
+            {
+                await connection.Value.SendAsync(json);
+            }
         }
 
-        private void OnClose()
+        private void OnClose(Guid connectionID)
         {
             Console.WriteLine("Connection closed");
-            connection = null;
+            connections.Remove(connectionID);
         }
 
-        private void OnError()
+        private void OnError(Guid connectionID)
         {
-            Console.WriteLine("Error!");
+            Console.WriteLine("Error encountered with connection n.o: " + connectionID);
         }
 
         private static async Task Main(string[] args)
