@@ -114,11 +114,11 @@ namespace ConnectionAPI
     {
         public static readonly string StaticHeader = "BookChanged";
 
-        public BookDTO book { get; set; }
-        public int changeType { get; set; }
+        public BookDTO Book { get; set; }
+        public int ChangeType { get; set; }
 
         public BookChangedResponse() : base(StaticHeader) { }
-        public BookChangedResponse(int change) : base(StaticHeader) { changeType = change; }
+        public BookChangedResponse(int change) : base(StaticHeader) { ChangeType = change; }
     }
 
 

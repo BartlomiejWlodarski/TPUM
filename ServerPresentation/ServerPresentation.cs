@@ -114,8 +114,8 @@ namespace ServerPresentation
             Console.WriteLine("Changed book n.o: " + e.AffectedBook.Id);
 
             BookChangedResponse bookChangedResponse = new BookChangedResponse(e.ChangedEventType);
-            bookChangedResponse.book = e.AffectedBook.ConvertToDTO();
-            
+            bookChangedResponse.Book = e.AffectedBook.ConvertToDTO();
+
             Serializer serializer = Serializer.Create();
             string json = serializer.Serialize(bookChangedResponse);
             Console.WriteLine(json);
