@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ConnectionAPI
@@ -23,6 +24,17 @@ namespace ConnectionAPI
         public static string StaticHeader = "GetBooks";
 
         public GetBooksCommand() : base(StaticHeader) { }
+    }
+
+
+    [Serializable]
+    public class SubscribeToNewsletterUpdatesCommand : ServerCommand
+    {
+        public static string StaticHeader = "SubscribeToNewsletterUpdates";
+
+        public bool Subscribed { get; set; }
+
+        public SubscribeToNewsletterUpdatesCommand() : base(StaticHeader) { }
     }
 
     [Serializable]
@@ -148,5 +160,14 @@ namespace ConnectionAPI
         public UserDTO User { get; set; }
 
         public UserChangedResponse() : base(StaticHeader) { }
+    }
+
+    [Serializable]
+    public class NewsletterUpdateResponse : ServerResponse
+    {
+        public static readonly string StaticHeader = "NewsletterSend";
+        public int Number { get; set; }
+
+        public NewsletterUpdateResponse() : base(StaticHeader) { }
     }
 }

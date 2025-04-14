@@ -72,6 +72,33 @@ namespace ServerPresentation
             {
                 GetUserCommand userCommand = serializer.Deserialize<GetUserCommand>(message);
                 await SendUser(userCommand.Username,connectionID);
+            } 
+            else if(serializer.GetCommandHeader(message) == SubscribeToNewsletterUpdatesCommand.StaticHeader)
+            {
+                SubscribeToNewsletterUpdatesCommand command = serializer.Deserialize<SubscribeToNewsletterUpdatesCommand>(message);
+                if (command.Subscribed)
+                {
+                    if (!Subs.Contains(connectionID))
+                    {
+                        Console.WriteLine("Adding connection [" + connectionID + "] to subsciber list");
+                        Subs.Add(connectionID);
+                    } 
+                    else
+                    {
+                        Console.WriteLine("Couldn't add connection [" + connectionID + "] to subsciber list. It's already present");
+                    }
+                } 
+                else {
+                    Console.WriteLine("Removing connection [" + connectionID + "] from subsciber list...");
+                    if (Subs.Remove(connectionID))
+                    {
+                        Console.WriteLine("Successfuly removed connection [" + connectionID + "] from subsciber list");
+                    } 
+                    else
+                    {
+                        Console.WriteLine("Removed connection [" + connectionID + "] from subsciber list failed");
+                    }
+                }
             }
         }
 
@@ -108,15 +135,25 @@ namespace ServerPresentation
             await connection.SendAsync(json);
         }
 
-        private async void HandleSubRaised()
+        private async void HandleSubRaised(int count)
         {
+            if (connections.Count == 0) return;
+
+            Console.WriteLine("Sending newsletter update...");
+
             Serializer serializer = Serializer.Create();
-            //string json = serializer.Serialize(); //Prepare subscription response string here
+
+            NewsletterUpdateResponse response = new NewsletterUpdateResponse();
+            response.Number = count;
+            string json = serializer.Serialize(response);
+
+            Console.WriteLine(json);
+
             foreach (Guid subID in Subs)
             {
                 if(connections.TryGetValue(subID, out WebSocketConnection? connection))
                 {
-                    //await connection.SendAsync(json); and pass it here
+                    await connection.SendAsync(json);
                 }
             }
         }

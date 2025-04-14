@@ -8,6 +8,7 @@ namespace ClientLogic.Abstract
         public event EventHandler<LogicUserChangedEventArgs> UserChanged;
         public event Action? LogicAllBooksUpdated;
         public event Action<int>? TransactionResult;
+        public event Action<int>? NewsletterUpdate;
 
         public void RequestUpdate();
 
@@ -16,6 +17,8 @@ namespace ClientLogic.Abstract
         public List<ILogicBook> GetAllBooks();
 
         void GetUser(string userName);
+
+        void Subscibe(bool value);
 
         public ILogicBook? GetBookByID(int bookID);
     }

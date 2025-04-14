@@ -6,7 +6,7 @@ namespace TPUMProject.Logic.Abstract
     {
         public event EventHandler<LogicBookRepositoryChangedEventArgs> BookRepositoryChanged;
         public event EventHandler<LogicUserChangedEventArgs> UserChanged;
-        public event Action? SubscriptionEvent;
+        public event Action<int>? SubscriptionEvent;
         IEnumerable<ILogicBook> GetAvailableBooks();
         void AddNewBook(string title, string author, decimal price);
         int BuyBook(int id, string username);

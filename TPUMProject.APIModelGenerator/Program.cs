@@ -9,7 +9,7 @@ internal static class Program
     private static async Task Main(string[] args)
     {
         Console.WriteLine("JSON Schema: \n\n");
-        JsonSchema schema = JsonSchema.FromType<UserChangedResponse>();
+        JsonSchema schema = JsonSchema.FromType<SubscribeToNewsletterUpdatesCommand>();
         string schemaString = schema.ToJson();
 
         Console.WriteLine(schemaString);

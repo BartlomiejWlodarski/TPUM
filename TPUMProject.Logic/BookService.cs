@@ -10,9 +10,13 @@ namespace TPUMProject.Logic
 
         public event EventHandler<LogicBookRepositoryChangedEventArgs>? BookRepositoryChanged;
         public event EventHandler<LogicUserChangedEventArgs>? UserChanged;
-        public event Action? SubscriptionEvent;
+        public event Action<int>? SubscriptionEvent;
 
         private object booksLock = new object();
+
+        private readonly int newsletterInterval = 10;
+
+        private int newsletterCount = 1;
 
         private readonly int recommendationInterval = 5;
 
@@ -36,6 +40,7 @@ namespace TPUMProject.Logic
                 user.UserChanged += HandleOnUserChanged;
             }
             StartRecommending();
+            StartSendingNewsletterNotifs();
         }
 
         public IEnumerable<ILogicBook> GetAvailableBooks() => _bookRepository.GetAllBooks().Select(book => new LogicBook(book));
@@ -70,6 +75,12 @@ namespace TPUMProject.Logic
                 user.AddPurchasedBook(book);
                 return _dataAPI.BookRepository.RemoveBook(id) ? 0 : 4; //0 - success 4 - unknown error;
             }
+        }
+
+        public void SendNewsLetter()
+        {
+            SubscriptionEvent?.Invoke(newsletterCount);
+            newsletterCount++;
         }
 
         public void GetRandomRecommendedBook()
@@ -122,6 +133,16 @@ namespace TPUMProject.Logic
                 await Task.Delay(recommendationInterval * 1000);
 
                 GetRandomRecommendedBook();
+            }
+        }
+
+        private async void StartSendingNewsletterNotifs()
+        {
+            while (true)
+            {
+                await Task.Delay(newsletterInterval * 1000);
+
+                SendNewsLetter();
             }
         }
     }

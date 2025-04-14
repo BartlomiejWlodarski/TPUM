@@ -7,11 +7,13 @@ namespace ConnectionAPI
         public static readonly string GetBooksCommandHeader = "GetBooks";
         public static readonly string SellBookCommandHeader = "SellBook";
         public static readonly string GetUserCommandHeader = "GetUser";
+        public static readonly string SubscribeToNewsletterUpdatesHeader = "SubscribeToNewsletterUpdates";
 
         public static readonly string AllBooksUpdateResponseHeader = "AllBooksUpdate";
         public static readonly string BookChangedResponseHeader = "BookChanged";
         public static readonly string TransactionResultResponseHeader = "TransactactionResult";
         public static readonly string UserChangedResponseHeader = "UserChanged";
+        public static readonly string NewsletterSend = "NewsletterSend";
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
@@ -26,6 +28,15 @@ namespace ConnectionAPI
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
     public partial class GetBooksCommand : ServerCommand
     {
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
+    public partial class SubscribeToNewsletterUpdatesCommand : ServerCommand
+    {
+        [Newtonsoft.Json.JsonProperty("Subscribed", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool Subscribed { get; set; }
+
 
     }
 
@@ -140,6 +151,14 @@ namespace ConnectionAPI
         [Newtonsoft.Json.JsonProperty("User", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public UserDTO User { get; set; }
 
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
+    public partial class NewsletterUpdateResponse : ServerResponse
+    {
+        [Newtonsoft.Json.JsonProperty("Number", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int Number { get; set; }
 
     }
 }

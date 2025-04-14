@@ -44,7 +44,7 @@ namespace ClientData
                 {
                     _userContainer.ChangeUser(response.User.ToUser());
                 }
-            }
+            } 
         }
 
         public override void GetUser(string username)
@@ -64,6 +64,25 @@ namespace ClientData
                 Username = username
             }
             ));
+        }
+
+        private async Task Subscibe(bool value)
+        {
+            Serializer serializer = Serializer.Create();
+            await _connectionService.SendAsync(serializer.Serialize(new SubscribeToNewsletterUpdatesCommand
+            {
+                Header = ServerStatics.SubscribeToNewsletterUpdatesHeader,
+                Subscribed = value
+            }
+            ));
+        }
+
+        public override void SubscibeToNewsLetterUpdates(bool value)
+        {
+            if (_connectionService.IsConnected())
+            {
+                Task task = Task.Run(async () => await Subscibe(value));
+            }
         }
     }
 }

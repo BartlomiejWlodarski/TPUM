@@ -11,6 +11,7 @@ namespace TPUMProject.Presentation.Model
         public event EventHandler<ModelUserChangedEventArgs>? UserChanged;
         public event Action? ModelAllBooksUpdated;
         public event Action<int>? TransactionResult;
+        public event Action<int>? NewsletterUpdated;
 
         public ModelBookRepository(IBookService bookService)
         {
@@ -20,6 +21,12 @@ namespace TPUMProject.Presentation.Model
             bookService.TransactionResult += (int code) => TransactionResult?.Invoke(code);
             bookService.UserChanged += HandleUserChanged;
             bookService.BookRepositoryChanged += HandleBookRepositoryChanged;
+            bookService.NewsletterUpdate += HandleNewsletterUpdated;
+        }
+
+        private void HandleNewsletterUpdated(int Number)
+        {
+            NewsletterUpdated?.Invoke(Number);
         }
 
         private void HandleBookRepositoryChanged(object sender, LogicBookRepositoryChangedEventArgs e)
