@@ -13,12 +13,14 @@ namespace ServerPresentation
         private readonly AbstractLogicAPI logicAPI;
 
         private Dictionary<Guid, WebSocketConnection> connections = new();
+        private List<Guid> Subs = new();
 
         private ServerPresentation(AbstractLogicAPI logicAPI)
         {
             this.logicAPI = logicAPI;
             this.logicAPI.BookService.BookRepositoryChanged += HandleBookRepositoryChanged;
             this.logicAPI.BookService.UserChanged += HandleUserChanged;
+            this.logicAPI.BookService.SubscriptionEvent += HandleSubRaised;
         }
 
         private async Task StartConnection()
@@ -106,6 +108,19 @@ namespace ServerPresentation
             await connection.SendAsync(json);
         }
 
+        private async void HandleSubRaised()
+        {
+            Serializer serializer = Serializer.Create();
+            //string json = serializer.Serialize(); //Prepare subscription response string here
+            foreach (Guid subID in Subs)
+            {
+                if(connections.TryGetValue(subID, out WebSocketConnection? connection))
+                {
+                    //await connection.SendAsync(json); and pass it here
+                }
+            }
+        }
+
         private async void HandleBookRepositoryChanged(object sender, LogicBookRepositoryChangedEventArgs e)
         {
             if(connections.Count == 0) return;
@@ -148,6 +163,7 @@ namespace ServerPresentation
         {
             Console.WriteLine("Connection closed");
             connections.Remove(connectionID);
+            Subs.Remove(connectionID);
         }
 
         private void OnError(Guid connectionID)

@@ -9,7 +9,8 @@ namespace TPUMProject.Logic
         private readonly AbstractDataAPI _dataAPI;
 
         public event EventHandler<LogicBookRepositoryChangedEventArgs>? BookRepositoryChanged;
-        public event EventHandler<LogicUserChangedEventArgs> UserChanged;
+        public event EventHandler<LogicUserChangedEventArgs>? UserChanged;
+        public event Action? SubscriptionEvent;
 
         private object booksLock = new object();
 
