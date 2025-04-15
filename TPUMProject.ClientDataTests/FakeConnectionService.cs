@@ -56,6 +56,7 @@ namespace TPUMProject.ClientDataTests
         public void MockUpdateAllBooks(FakeBookDTO[] books)
         {
             FakeAllBooksUpdateResponse response = new FakeAllBooksUpdateResponse();
+            response.Header = FakeServerStatics.AllBooksUpdateResponseHeader;
             response.Books = books;
             OnMessage?.Invoke(serializer.Serialize(response));
         }
