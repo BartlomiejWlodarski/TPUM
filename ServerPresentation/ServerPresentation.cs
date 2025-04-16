@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TPUMProject.Logic.Abstract;
+using TPUMProject.ServerPresentation;
 
 namespace ServerPresentation
 {
@@ -14,6 +15,7 @@ namespace ServerPresentation
 
         private Dictionary<Guid, WebSocketConnection> connections = new();
         private List<Guid> Subs = new();
+        private Dictionary<Guid,ConnectionSubscription> Subscriptions = new();
 
         private ServerPresentation(AbstractLogicAPI logicAPI)
         {
@@ -78,10 +80,24 @@ namespace ServerPresentation
                 SubscribeToNewsletterUpdatesCommand command = serializer.Deserialize<SubscribeToNewsletterUpdatesCommand>(message);
                 if (command.Subscribed)
                 {
-                    if (!Subs.Contains(connectionID))
+                    if (!Subscriptions.TryGetValue(connectionID, out ConnectionSubscription? sub) && connections.TryGetValue(connectionID,out WebSocketConnection? connect))
                     {
                         Console.WriteLine("Adding connection [" + connectionID + "] to subsciber list");
-                        Subs.Add(connectionID);
+
+                        Subscriptions.Add(connectionID, new ConnectionSubscription(async (x,y) => 
+                        { 
+                            NewsletterSubsciptionEventArgs args = (NewsletterSubsciptionEventArgs)x;
+
+                            Console.WriteLine("Sending newsletter update to " + connectionID +"...");
+
+                            NewsletterUpdateResponse response = new NewsletterUpdateResponse();
+                            response.Number = args.Number;
+                            string json = serializer.Serialize(response);
+
+                            Console.WriteLine(json);
+
+                            await y.SendAsync(json);
+                        },logicAPI.BookService,connect));
                     } 
                     else
                     {
@@ -90,13 +106,17 @@ namespace ServerPresentation
                 } 
                 else {
                     Console.WriteLine("Removing connection [" + connectionID + "] from subsciber list...");
-                    if (Subs.Remove(connectionID))
+                    if(Subscriptions.TryGetValue(connectionID, out ConnectionSubscription? sub))
                     {
-                        Console.WriteLine("Successfuly removed connection [" + connectionID + "] from subsciber list");
-                    } 
-                    else
-                    {
-                        Console.WriteLine("Removed connection [" + connectionID + "] from subsciber list failed");
+                        sub.OnCompleted();
+                        if (Subscriptions.Remove(connectionID))
+                        {
+                            Console.WriteLine("Successfuly removed connection [" + connectionID + "] from subsciber list");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Removed connection [" + connectionID + "] from subsciber list failed");
+                        }
                     }
                 }
             }
@@ -200,7 +220,14 @@ namespace ServerPresentation
         {
             Console.WriteLine("Connection closed");
             connections.Remove(connectionID);
-            Subs.Remove(connectionID);
+            if (Subscriptions.TryGetValue(connectionID, out ConnectionSubscription? sub))
+            {
+                sub.OnCompleted();
+                if (Subscriptions.Remove(connectionID))
+                {
+                    Console.WriteLine("Successfuly removed connection [" + connectionID + "] from subsciber list");
+                }
+            }
         }
 
         private void OnError(Guid connectionID)

@@ -12,6 +12,8 @@ namespace TPUMProject.Logic
         public event EventHandler<LogicUserChangedEventArgs>? UserChanged;
         public event Action<int>? SubscriptionEvent;
 
+        private HashSet<IObserver<SubscriptionEventArgs>> observers;
+
         private object booksLock = new object();
 
         private readonly int newsletterInterval = 10;
@@ -32,6 +34,7 @@ namespace TPUMProject.Logic
 
         public BookService(AbstractDataAPI dataAPI)
         {
+            observers = new HashSet<IObserver<SubscriptionEventArgs>>();
             _dataAPI = dataAPI;
             _bookRepository = dataAPI.BookRepository;
             _bookRepository.BookRepositoryChangedHandler += HandleOnBookRepositoryChanged;
@@ -39,8 +42,17 @@ namespace TPUMProject.Logic
             {
                 user.UserChanged += HandleOnUserChanged;
             }
+            
             StartRecommending();
             StartSendingNewsletterNotifs();
+        }
+
+        ~BookService(){
+            List<IObserver<SubscriptionEventArgs>> cachedObservers = observers.ToList();
+            foreach (IObserver<SubscriptionEventArgs>? observer in cachedObservers)
+            {
+                observer?.OnCompleted();
+            }
         }
 
         public IEnumerable<ILogicBook> GetAvailableBooks() => _bookRepository.GetAllBooks().Select(book => new LogicBook(book));
@@ -79,7 +91,11 @@ namespace TPUMProject.Logic
 
         public void SendNewsLetter()
         {
-            SubscriptionEvent?.Invoke(newsletterCount);
+            //SubscriptionEvent?.Invoke(newsletterCount);
+            foreach (IObserver<SubscriptionEventArgs>? observer in observers)
+            {
+                observer.OnNext(new NewsletterSubsciptionEventArgs(newsletterCount));
+            }
             newsletterCount++;
         }
 
@@ -143,6 +159,33 @@ namespace TPUMProject.Logic
                 await Task.Delay(newsletterInterval * 1000);
 
                 SendNewsLetter();
+            }
+        }
+
+        public IDisposable Subscribe(IObserver<SubscriptionEventArgs> observer)
+        {
+            observers.Add(observer);
+            return new SubscriptionDisposable(this, observer);
+        }
+
+        private void Unsubscribe(IObserver<SubscriptionEventArgs> observer)
+        {
+            observers.Remove(observer);
+        }
+
+        private class SubscriptionDisposable : IDisposable
+        {
+            private readonly BookService _bookService;
+            private readonly IObserver<SubscriptionEventArgs> _observer;
+
+            public SubscriptionDisposable(BookService bookService, IObserver<SubscriptionEventArgs> observer)
+            {
+               _bookService = bookService;
+                _observer = observer;
+            }
+            public void Dispose()
+            {
+                _bookService.Unsubscribe(_observer);
             }
         }
     }
