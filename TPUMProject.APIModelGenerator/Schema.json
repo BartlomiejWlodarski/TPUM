@@ -1,0 +1,493 @@
+[
+  {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "ServerCommand",
+    "type": "object",
+    "x-abstract": true,
+    "additionalProperties": false,
+    "properties": {
+      "Header": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "GetBooksCommand",
+    "definitions": {
+      "ServerCommand": {
+        "type": "object",
+        "x-abstract": true,
+        "additionalProperties": false,
+        "properties": {
+          "Header": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "allOf": [
+      {
+        "$ref": "#/definitions/ServerCommand"
+      },
+      {
+        "type": "object",
+        "additionalProperties": false
+      }
+    ]
+  },
+  {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "SubscribeToNewsletterUpdatesCommand",
+    "definitions": {
+      "ServerCommand": {
+        "type": "object",
+        "x-abstract": true,
+        "additionalProperties": false,
+        "properties": {
+          "Header": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "allOf": [
+      {
+        "$ref": "#/definitions/ServerCommand"
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Subscribed": {
+            "type": "boolean"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "SellBookCommand",
+    "definitions": {
+      "ServerCommand": {
+        "type": "object",
+        "x-abstract": true,
+        "additionalProperties": false,
+        "properties": {
+          "Header": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "allOf": [
+      {
+        "$ref": "#/definitions/ServerCommand"
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "BookID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Username": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "GetUserCommand",
+    "definitions": {
+      "ServerCommand": {
+        "type": "object",
+        "x-abstract": true,
+        "additionalProperties": false,
+        "properties": {
+          "Header": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "allOf": [
+      {
+        "$ref": "#/definitions/ServerCommand"
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Username": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "BookDTO",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "Id": {
+        "type": "integer",
+        "format": "int32"
+      },
+      "Title": {
+        "type": "string"
+      },
+      "Author": {
+        "type": "string"
+      },
+      "Price": {
+        "type": "number",
+        "format": "decimal"
+      },
+      "Recommended": {
+        "type": "boolean"
+      },
+      "Genre": {
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  },
+  {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "UserDTO",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "Username": {
+        "type": "string"
+      },
+      "Balance": {
+        "type": "number",
+        "format": "decimal"
+      },
+      "Books": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/BookDTO"
+        }
+      }
+    },
+    "definitions": {
+      "BookDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Author": {
+            "type": "string"
+          },
+          "Price": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "Recommended": {
+            "type": "boolean"
+          },
+          "Genre": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    }
+  },
+  {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "ServerResponse",
+    "type": "object",
+    "x-abstract": true,
+    "additionalProperties": false,
+    "properties": {
+      "Header": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "AllBooksUpdateResponse",
+    "definitions": {
+      "BookDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Author": {
+            "type": "string"
+          },
+          "Price": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "Recommended": {
+            "type": "boolean"
+          },
+          "Genre": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ServerResponse": {
+        "type": "object",
+        "x-abstract": true,
+        "additionalProperties": false,
+        "properties": {
+          "Header": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "allOf": [
+      {
+        "$ref": "#/definitions/ServerResponse"
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Books": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/definitions/BookDTO"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "BookChangedResponse",
+    "definitions": {
+      "BookDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Author": {
+            "type": "string"
+          },
+          "Price": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "Recommended": {
+            "type": "boolean"
+          },
+          "Genre": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ServerResponse": {
+        "type": "object",
+        "x-abstract": true,
+        "additionalProperties": false,
+        "properties": {
+          "Header": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "allOf": [
+      {
+        "$ref": "#/definitions/ServerResponse"
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Book": {
+            "$ref": "#/definitions/BookDTO"
+          },
+          "ChangeType": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "TransactionResultResponse",
+    "definitions": {
+      "ServerResponse": {
+        "type": "object",
+        "x-abstract": true,
+        "additionalProperties": false,
+        "properties": {
+          "Header": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "allOf": [
+      {
+        "$ref": "#/definitions/ServerResponse"
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "BookID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Username": {
+            "type": "string"
+          },
+          "ResultCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "UserChangedResponse",
+    "definitions": {
+      "UserDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Username": {
+            "type": "string"
+          },
+          "Balance": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "Books": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/BookDTO"
+            }
+          }
+        }
+      },
+      "BookDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Author": {
+            "type": "string"
+          },
+          "Price": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "Recommended": {
+            "type": "boolean"
+          },
+          "Genre": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ServerResponse": {
+        "type": "object",
+        "x-abstract": true,
+        "additionalProperties": false,
+        "properties": {
+          "Header": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "allOf": [
+      {
+        "$ref": "#/definitions/ServerResponse"
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "User": {
+            "$ref": "#/definitions/UserDTO"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "NewsletterUpdateResponse",
+    "definitions": {
+      "ServerResponse": {
+        "type": "object",
+        "x-abstract": true,
+        "additionalProperties": false,
+        "properties": {
+          "Header": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "allOf": [
+      {
+        "$ref": "#/definitions/ServerResponse"
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "Number": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    ]
+  }
+]
