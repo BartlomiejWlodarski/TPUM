@@ -1,16 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<OutputType>Exe</OutputType>
-	<StartupObject>ServerPresentation.ServerPresentation</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ClinetAPI\TPUMProject.ConnectionAPI.csproj" />
-    <ProjectReference Include="..\TPUMProject.Logic\TPUMProject.ServerLogic.csproj" />
+    <ProjectReference Include="..\ServerPresentation\TPUMProject.ServerPresentation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json.Schema" Version="3.0.15" />
+    <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="11.0.0" />
   </ItemGroup>
 
 </Project>

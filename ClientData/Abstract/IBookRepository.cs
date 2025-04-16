@@ -5,6 +5,7 @@
         public event EventHandler<BookRepositoryChangedEventArgs> BookRepositoryChangedHandler;
         public event Action? AllBooksUpdated;
         public event Action<int>? TransactionResult;
+        public event Action<int>? NewsletterUpdate;
 
         public void RequestUpdate();
 

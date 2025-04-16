@@ -18,6 +18,8 @@ namespace TPUMProject.Data
         {
             _users = new List<IUser>();
             _users.Add(new User("Marcin", 100));
+            _users.Add(new User("Michał", 50));
+            _users.Add(new User("Konrad", 10));
             _bookRepository = new BookRepository();
             _bookRepository.AddBook(CreateBook("Pan Tadeusz", "Adam Mickiewicz", 20));
             _bookRepository.AddBook(CreateBook("Romeo i Julia", "Szekspir", 25));

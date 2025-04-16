@@ -1,5 +1,5 @@
 ﻿using ClientData.Abstract;
-using ClientAPI;
+using ConnectionAPI;
 using System.Net.WebSockets;
 
 namespace TPUMProject.ClientLogicTests
@@ -49,6 +49,11 @@ namespace TPUMProject.ClientLogicTests
         {
             throw new NotImplementedException();
         }
+
+        public override void SubscibeToNewsLetterUpdates(bool value)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     internal class FakeBookRepository : IBookRepository
@@ -61,6 +66,7 @@ namespace TPUMProject.ClientLogicTests
         public event Action? AllBooksUpdated;
         public event Action<int>? TransactionResult;
         public event EventHandler<BookRepositoryChangedEventArgs>? BookRepositoryChangedHandler;
+        public event Action<int>? NewsletterUpdate;
 
         IConnectionService connectionService;
 

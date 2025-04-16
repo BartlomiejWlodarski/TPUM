@@ -21,7 +21,10 @@ namespace TPUMProject.Presentation.ViewModel
         private string _shoppingButtonContent = _userList;
         private string _connectionStateString;
         private string _transactionResultString;
+        private string _newsLetterUpdate;
+        private bool _subscibed = false;
         private Visibility _buttonVisibility = Visibility.Visible;
+        private Visibility _newsletterVisibility = Visibility.Hidden;
         private int selectedIndex = 0;
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -39,6 +42,7 @@ namespace TPUMProject.Presentation.ViewModel
             ModelLayer.ModelBookRepository.UserChanged += (sender, e) => RunOnUI(() => HandleUserChanged(sender, e));
             ModelLayer.ModelBookRepository.BookRepositoryChanged += (sender, e) => RunOnUI(() => HandleBookRepositoryChanged(sender, e));
             ModelLayer.ModelBookRepository.TransactionResult += (int code) => RunOnUI(() => ReceiveTransactionCode(code));
+            ModelLayer.ModelBookRepository.NewsletterUpdated += (int code) => RunOnUI(() => HandleNewsletterUpdated(code));
 
             Books = new AsyncObservableCollection<ViewModelBook>();
             BooksShow = Books;
@@ -47,6 +51,11 @@ namespace TPUMProject.Presentation.ViewModel
 
             Buy = new RelayCommand(() => RelayBuy());
             ChangeList = new RelayCommand(() => RelayChangeList());
+        }
+
+        private void HandleNewsletterUpdated(int Number)
+        {
+            NewsLetterUpdate = "Newsletter n.o " + Number + " released";
         }
 
         private void RunOnUI(Action action)
@@ -66,7 +75,7 @@ namespace TPUMProject.Presentation.ViewModel
         private void OnConnectionStateChange()
         {
             bool connectionState = ModelLayer.ModelConnectionService.IsConnected();
-            ConnectionStateString = connectionState ? "Connected" : "Disconnected";
+            ConnectionStateString = connectionState ? "Connection State: Connected" : "Connection State: Disconnected";
 
             if (connectionState)
             {
@@ -139,19 +148,19 @@ namespace TPUMProject.Presentation.ViewModel
             switch (code)
             {
                 case 0:
-                    TransactionResultString = "Success";
+                    TransactionResultString = "Last Transaction Result: Success";
                     break;
                 case 1:
-                    TransactionResultString = "Money error";
+                    TransactionResultString = "Last Transaction Result: Money error";
                     break;
                 case 2:
-                    TransactionResultString = "Book missing";
+                    TransactionResultString = "Last Transaction Result: Book missing";
                     break;
                 case 3:
-                    TransactionResultString = "Invalid user";
+                    TransactionResultString = "Last Transaction Result: Invalid user";
                     break ;  
                 default:
-                    TransactionResultString = "Uknown error";
+                    TransactionResultString = "Last Transaction Result: Uknown error";
                     break;
             }
         }
@@ -202,6 +211,44 @@ namespace TPUMProject.Presentation.ViewModel
         }
 
         // === Public Properties ===
+
+        public Visibility NewsletterVisibility
+        {
+            get => _newsletterVisibility;
+            set
+            {
+                 _newsletterVisibility = value;
+                 OnPropertyChanged();
+            }
+        }
+
+        public string NewsLetterUpdate
+        {
+            get => _newsLetterUpdate;
+            set
+            {
+                if (_newsLetterUpdate != value)
+                {
+                    _newsLetterUpdate = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool Subscibed
+        {
+            get => _subscibed;
+            set
+            {
+                if( _subscibed != value )
+                {
+                    _subscibed = value;
+                    OnPropertyChanged();
+                    NewsletterVisibility = _subscibed ? Visibility.Visible : Visibility.Hidden;
+                    ModelLayer.Subscibe(_subscibed);
+                }
+            }
+        }
 
         public IModelUser User
         {

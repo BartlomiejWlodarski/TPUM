@@ -9,9 +9,16 @@ namespace TPUMProject.Logic
         private readonly AbstractDataAPI _dataAPI;
 
         public event EventHandler<LogicBookRepositoryChangedEventArgs>? BookRepositoryChanged;
-        public event EventHandler<LogicUserChangedEventArgs> UserChanged;
+        public event EventHandler<LogicUserChangedEventArgs>? UserChanged;
+        public event Action<int>? SubscriptionEvent;
+
+        private HashSet<IObserver<SubscriptionEventArgs>> observers;
 
         private object booksLock = new object();
+
+        private readonly int newsletterInterval = 10;
+
+        private int newsletterCount = 1;
 
         private readonly int recommendationInterval = 5;
 
@@ -27,6 +34,7 @@ namespace TPUMProject.Logic
 
         public BookService(AbstractDataAPI dataAPI)
         {
+            observers = new HashSet<IObserver<SubscriptionEventArgs>>();
             _dataAPI = dataAPI;
             _bookRepository = dataAPI.BookRepository;
             _bookRepository.BookRepositoryChangedHandler += HandleOnBookRepositoryChanged;
@@ -34,7 +42,17 @@ namespace TPUMProject.Logic
             {
                 user.UserChanged += HandleOnUserChanged;
             }
+            
             StartRecommending();
+            StartSendingNewsletterNotifs();
+        }
+
+        ~BookService(){
+            List<IObserver<SubscriptionEventArgs>> cachedObservers = observers.ToList();
+            foreach (IObserver<SubscriptionEventArgs>? observer in cachedObservers)
+            {
+                observer?.OnCompleted();
+            }
         }
 
         public IEnumerable<ILogicBook> GetAvailableBooks() => _bookRepository.GetAllBooks().Select(book => new LogicBook(book));
@@ -69,6 +87,16 @@ namespace TPUMProject.Logic
                 user.AddPurchasedBook(book);
                 return _dataAPI.BookRepository.RemoveBook(id) ? 0 : 4; //0 - success 4 - unknown error;
             }
+        }
+
+        public void SendNewsLetter()
+        {
+            //SubscriptionEvent?.Invoke(newsletterCount);
+            foreach (IObserver<SubscriptionEventArgs>? observer in observers)
+            {
+                observer.OnNext(new NewsletterSubsciptionEventArgs(newsletterCount));
+            }
+            newsletterCount++;
         }
 
         public void GetRandomRecommendedBook()
@@ -121,6 +149,43 @@ namespace TPUMProject.Logic
                 await Task.Delay(recommendationInterval * 1000);
 
                 GetRandomRecommendedBook();
+            }
+        }
+
+        private async void StartSendingNewsletterNotifs()
+        {
+            while (true)
+            {
+                await Task.Delay(newsletterInterval * 1000);
+
+                SendNewsLetter();
+            }
+        }
+
+        public IDisposable Subscribe(IObserver<SubscriptionEventArgs> observer)
+        {
+            observers.Add(observer);
+            return new SubscriptionDisposable(this, observer);
+        }
+
+        private void Unsubscribe(IObserver<SubscriptionEventArgs> observer)
+        {
+            observers.Remove(observer);
+        }
+
+        private class SubscriptionDisposable : IDisposable
+        {
+            private readonly BookService _bookService;
+            private readonly IObserver<SubscriptionEventArgs> _observer;
+
+            public SubscriptionDisposable(BookService bookService, IObserver<SubscriptionEventArgs> observer)
+            {
+               _bookService = bookService;
+                _observer = observer;
+            }
+            public void Dispose()
+            {
+                _bookService.Unsubscribe(_observer);
             }
         }
     }

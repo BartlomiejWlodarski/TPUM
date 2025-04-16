@@ -13,6 +13,7 @@ namespace ClientLogic
         public event EventHandler<LogicUserChangedEventArgs>? UserChanged;
         public event Action? LogicAllBooksUpdated;
         public event Action<int>? TransactionResult;
+        public event Action<int>? NewsletterUpdate;
 
         private IDisposable BookRepoHandle;
 
@@ -27,6 +28,12 @@ namespace ClientLogic
             _bookRepository.TransactionResult += (int code) => TransactionResult?.Invoke(code);
             _bookRepository.BookRepositoryChangedHandler += HandleOnBookRepositoryChanged;
             _dataAPI.GetUserContainer().UserChanged += HandleOnUserChanged;
+            _bookRepository.NewsletterUpdate += HandleOnNewsletterUpdated;
+        }
+
+        private void HandleOnNewsletterUpdated(int Number)
+        {
+            NewsletterUpdate?.Invoke(Number);
         }
 
         private void HandleOnBookRepositoryChanged(object sender, BookRepositoryChangedEventArgs e)
@@ -87,6 +94,11 @@ namespace ClientLogic
         public void OnNext(BookRepositoryChangedEventArgs value)
         {
             BookRepositoryChanged?.Invoke(this, new LogicBookRepositoryChangedEventArgs(value));
+        }
+
+        public void Subscibe(bool value)
+        {
+            _dataAPI.SubscibeToNewsLetterUpdates(value);
         }
     }
 }

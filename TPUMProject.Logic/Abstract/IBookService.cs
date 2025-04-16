@@ -2,15 +2,32 @@
 
 namespace TPUMProject.Logic.Abstract
 {
-    public interface IBookService
+    public interface IBookService : IObservable<SubscriptionEventArgs>
     {
         public event EventHandler<LogicBookRepositoryChangedEventArgs> BookRepositoryChanged;
         public event EventHandler<LogicUserChangedEventArgs> UserChanged;
-
+        public event Action<int>? SubscriptionEvent;
         IEnumerable<ILogicBook> GetAvailableBooks();
         void AddNewBook(string title, string author, decimal price);
         int BuyBook(int id, string username);
         void GetRandomRecommendedBook();
+    }
+
+    public abstract class SubscriptionEventArgs : EventArgs
+    {
+        public Type? Type;
+
+        public SubscriptionEventArgs() { Type = this.GetType(); }
+    }
+
+    public class NewsletterSubsciptionEventArgs : SubscriptionEventArgs
+    {
+        public int Number;
+
+        public NewsletterSubsciptionEventArgs(int number) : base()
+        {
+            Number = number;
+        }
     }
 
     public class LogicBookRepositoryChangedEventArgs : EventArgs

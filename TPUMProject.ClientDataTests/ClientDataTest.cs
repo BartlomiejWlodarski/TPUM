@@ -1,5 +1,5 @@
 ﻿using ClientData.Abstract;
-using ClientAPI;
+using ConnectionAPI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,17 +20,17 @@ namespace TPUMProject.ClientDataTests
         public void PrepareData()
         {
             connectionService.MockUpdateAllBooks([
-                new BookDTO(7, "TestTitle", "TestAuthor", 20, false, 1),
-            new BookDTO(8, "TestTitle2", "TestAuthor2", 40, false, 2)
+                new FakeBookDTO{Id = 7, Title = "TestTitle", Author = "TestAuthor", Price = 20, Recommended = false, Genre = 1 },
+                new FakeBookDTO{Id = 8, Title = "TestTitle2", Author = "TestAuthor2", Price = 40, Recommended = false, Genre = 2 }
             ]);
         }
 
         [TestMethod]
         public void UpdateAllTest()
         {
-            BookDTO[] bookDTOs = [
-                new BookDTO(7, "TestTitle", "TestAuthor", 20, false, 1),
-            new BookDTO(8, "TestTitle2", "TestAuthor2", 40, false, 2)
+            FakeBookDTO[] bookDTOs = [
+                new FakeBookDTO{Id = 7, Title = "TestTitle", Author = "TestAuthor", Price = 20, Recommended = false, Genre = 1 },
+                new FakeBookDTO{Id = 8, Title = "TestTitle2", Author = "TestAuthor2", Price = 40, Recommended = false, Genre = 2 } 
             ];
 
             connectionService.MockUpdateAllBooks(bookDTOs);
@@ -52,7 +52,10 @@ namespace TPUMProject.ClientDataTests
         {
             Assert.AreEqual(data.GetBookRepository().GetAllBooks().Count(), 0);
 
-            PrepareData();
+            connectionService.MockUpdateAllBooks([
+                new FakeBookDTO{Id = 7, Title = "TestTitle", Author = "TestAuthor", Price = 20, Recommended = false, Genre = 1 },
+                new FakeBookDTO{Id = 8, Title = "TestTitle2", Author = "TestAuthor2", Price = 40, Recommended = false, Genre = 2 }
+            ]);
 
             Assert.AreEqual(data.GetBookRepository().GetAllBooks().Count(), 2);
         }
@@ -61,15 +64,16 @@ namespace TPUMProject.ClientDataTests
         public async Task BuyBookTest()
         {
             connectionService.MockUpdateAllBooks([
-                new BookDTO(7, "TestTitle", "TestAuthor", 20, false, 1),
-            new BookDTO(8, "TestTitle2", "TestAuthor2", 40, false, 2)
+                new FakeBookDTO{ Id = 7, Title = "TestTitle", Author = "TestAuthor", Price = 20, Recommended = false, Genre = 1 },
+                new FakeBookDTO{ Id = 8, Title = "TestTitle2", Author = "TestAuthor2", Price = 40, Recommended = false, Genre = 2 }
             ]);
 
             BookDTO[] books;
 
             connectionService.MockUpdateUser(
-                new UserDTO("Marcin", 50, [new BookDTO(6, "TestTitle3", "TestAuthor3", 10, false, 1)])
-                );
+                new FakeUserDTO { Username = "Marcin", Balance = 50, 
+                    Books = [new FakeBookDTO { Id = 6, Title = "TestTitle3", Author = "TestAuthor3", Price = 10, Recommended = false, Genre = 1 }] 
+                });
 
             await data.GetBookRepository().SellBook(7, "Marcin");
 

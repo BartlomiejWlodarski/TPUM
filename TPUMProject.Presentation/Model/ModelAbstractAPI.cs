@@ -75,5 +75,10 @@ namespace TPUMProject.Presentation.Model
         {
             abstractLogic.GetBookService().GetUser(userName);
         }
+
+        public void Subscibe(bool value)
+        {
+            abstractLogic.GetBookService().Subscibe(value);
+        }
     }
 }

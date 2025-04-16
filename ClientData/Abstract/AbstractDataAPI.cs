@@ -8,6 +8,8 @@
         }
         public abstract void GetUser(string username);
 
+        public abstract void SubscibeToNewsLetterUpdates(bool value);
+
         public abstract IConnectionService GetConnectionService();
 
         public abstract IBookRepository GetBookRepository();

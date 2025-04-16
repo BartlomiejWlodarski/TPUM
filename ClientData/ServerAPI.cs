@@ -1,76 +1,68 @@
-﻿using ClientData;
-using ClientData.Abstract;
-using ConnectionAPI;
-using System.Text.Json.Nodes;
+﻿using Newtonsoft.Json;
 
-namespace TPUMProject.ClientDataTests
+namespace ConnectionAPI
 {
-    internal class FakeConnectionService : IConnectionService
+    internal static class ServerStatics
     {
-        public event Action<string>? Logger;
-        public event Action? OnConnectStateChanged;
-        public event Action<string>? OnMessage;
-        public event Action? OnError;
-        public event Action? OnDisconnect;
+        public static readonly string GetBooksCommandHeader = "GetBooks";
+        public static readonly string SellBookCommandHeader = "SellBook";
+        public static readonly string GetUserCommandHeader = "GetUser";
+        public static readonly string SubscribeToNewsletterUpdatesHeader = "SubscribeToNewsletterUpdates";
 
-        public Task Connect(Uri uri)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task Disconnect()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool IsConnected()
-        {
-            return true;
-        }
-
-        public async Task SendAsync(string message)
-        {
-            if (serializer.GetCommandHeader(message) == FakeServerStatics.GetBooksCommandHeader)
-            {
-                FakeAllBooksUpdateResponse response = new FakeAllBooksUpdateResponse();
-                response.Books = [new FakeBookDTO { Id = nextId, Title = "TestTitle", Author = "TestAuthor", Price = 20, Recommended = false, Genre = 1 }];
-                nextId++;
-                OnMessage?.Invoke(serializer.Serialize(response));
-            }
-            else if (serializer.GetCommandHeader(message) == FakeServerStatics.SellBookCommandHeader)
-            {
-                SellBookCommand sellItemCommand = serializer.Deserialize<SellBookCommand>(message);
-                lastBoughtId = sellItemCommand.BookID;
-
-                FakeTransactionResultResponse response = new FakeTransactionResultResponse {BookID = lastBoughtId, Username = "TestUser", ResultCode = 0 };
-                OnMessage?.Invoke(serializer.Serialize(response));
-            }
-
-            await Task.Delay(0);
-        }
-
-        private Serializer serializer = Serializer.Create();
-        public int lastBoughtId;
-        public int nextId = 5;
-
-        public void MockUpdateAllBooks(FakeBookDTO[] books)
-        {
-            FakeAllBooksUpdateResponse response = new FakeAllBooksUpdateResponse();
-            response.Header = FakeServerStatics.AllBooksUpdateResponseHeader;
-            response.Books = books;
-            OnMessage?.Invoke(serializer.Serialize(response));
-        }
-
-        public void MockUpdateUser(FakeUserDTO user)
-        {
-            FakeUserChangedResponse response = new FakeUserChangedResponse();
-            response.User = user;
-            OnMessage?.Invoke(serializer.Serialize(response));
-        }
+        public static readonly string AllBooksUpdateResponseHeader = "AllBooksUpdate";
+        public static readonly string BookChangedResponseHeader = "BookChanged";
+        public static readonly string TransactionResultResponseHeader = "TransactactionResult";
+        public static readonly string UserChangedResponseHeader = "UserChanged";
+        public static readonly string NewsletterSend = "NewsletterSend";
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class FakeBookDTO
+    public abstract partial class ServerCommand
+    {
+        [Newtonsoft.Json.JsonProperty("Header", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Header { get; set; }
+
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
+    public partial class GetBooksCommand : ServerCommand
+    {
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
+    public partial class SubscribeToNewsletterUpdatesCommand : ServerCommand
+    {
+        [Newtonsoft.Json.JsonProperty("Subscribed", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool Subscribed { get; set; }
+
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
+    public partial class SellBookCommand : ServerCommand
+    {
+        [Newtonsoft.Json.JsonProperty("BookID", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int BookID { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("Username", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Username { get; set; }
+
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
+    public partial class GetUserCommand : ServerCommand
+    {
+        [Newtonsoft.Json.JsonProperty("Username", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Username { get; set; }
+
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
+    public partial class BookDTO
     {
         [Newtonsoft.Json.JsonProperty("Id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int Id { get; set; }
@@ -94,7 +86,7 @@ namespace TPUMProject.ClientDataTests
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
-    public abstract partial class FakeServerResponse
+    public abstract partial class ServerResponse
     {
         [Newtonsoft.Json.JsonProperty("Header", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Header { get; set; }
@@ -103,19 +95,19 @@ namespace TPUMProject.ClientDataTests
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class FakeAllBooksUpdateResponse : FakeServerResponse
+    public partial class AllBooksUpdateResponse : ServerResponse
     {
         [Newtonsoft.Json.JsonProperty("Books", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<FakeBookDTO> Books { get; set; }
+        public System.Collections.Generic.ICollection<BookDTO> Books { get; set; }
 
 
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class FakeBookChangedResponse : FakeServerResponse
+    public partial class BookChangedResponse : ServerResponse
     {
         [Newtonsoft.Json.JsonProperty("book", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public FakeBookDTO Book { get; set; }
+        public BookDTO Book { get; set; }
 
         [Newtonsoft.Json.JsonProperty("changeType", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int ChangeType { get; set; }
@@ -124,7 +116,7 @@ namespace TPUMProject.ClientDataTests
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class FakeTransactionResultResponse : FakeServerResponse
+    public partial class TransactionResultResponse : ServerResponse
     {
         [Newtonsoft.Json.JsonProperty("BookID", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int BookID { get; set; }
@@ -139,7 +131,7 @@ namespace TPUMProject.ClientDataTests
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class FakeUserDTO
+    public partial class UserDTO
     {
         [Newtonsoft.Json.JsonProperty("Username", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Username { get; set; }
@@ -148,40 +140,25 @@ namespace TPUMProject.ClientDataTests
         public decimal Balance { get; set; }
 
         [Newtonsoft.Json.JsonProperty("Books", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.ICollection<FakeBookDTO> Books { get; set; }
+        public System.Collections.Generic.ICollection<BookDTO> Books { get; set; }
 
 
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class FakeUserChangedResponse : FakeServerResponse
+    public partial class UserChangedResponse : ServerResponse
     {
         [Newtonsoft.Json.JsonProperty("User", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public FakeUserDTO User { get; set; }
+        public UserDTO User { get; set; }
 
 
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "11.0.0.0 (Newtonsoft.Json v13.0.0.0)")]
-    public partial class FakeNewsletterUpdateResponse : FakeServerResponse
+    public partial class NewsletterUpdateResponse : ServerResponse
     {
         [Newtonsoft.Json.JsonProperty("Number", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int Number { get; set; }
 
     }
-
-    internal static class FakeServerStatics
-    {
-        public static readonly string GetBooksCommandHeader = "GetBooks";
-        public static readonly string SellBookCommandHeader = "SellBook";
-        public static readonly string GetUserCommandHeader = "GetUser";
-        public static readonly string SubscribeToNewsletterUpdatesHeader = "SubscribeToNewsletterUpdates";
-
-        public static readonly string AllBooksUpdateResponseHeader = "AllBooksUpdate";
-        public static readonly string BookChangedResponseHeader = "BookChanged";
-        public static readonly string TransactionResultResponseHeader = "TransactactionResult";
-        public static readonly string UserChangedResponseHeader = "UserChanged";
-        public static readonly string NewsletterSend = "NewsletterSend";
-    }
-
 }

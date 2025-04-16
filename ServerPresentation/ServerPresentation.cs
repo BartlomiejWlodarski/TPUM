@@ -1,25 +1,28 @@
-﻿using ClientAPI;
+﻿using ConnectionAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TPUMProject.Logic.Abstract;
+using TPUMProject.ServerPresentation;
 
 namespace ServerPresentation
 {
     internal class ServerPresentation
     {
         private readonly AbstractLogicAPI logicAPI;
-        private WebSocketConnection? connection;
 
-        object connectionLock = new object();
+        private Dictionary<Guid, WebSocketConnection> connections = new();
+        private List<Guid> Subs = new();
+        private Dictionary<Guid,ConnectionSubscription> Subscriptions = new();
 
         private ServerPresentation(AbstractLogicAPI logicAPI)
         {
             this.logicAPI = logicAPI;
             this.logicAPI.BookService.BookRepositoryChanged += HandleBookRepositoryChanged;
             this.logicAPI.BookService.UserChanged += HandleUserChanged;
+            this.logicAPI.BookService.SubscriptionEvent += HandleSubRaised;
         }
 
         private async Task StartConnection()
@@ -39,12 +42,12 @@ namespace ServerPresentation
             connection.OnClose = OnClose;
             connection.OnError = OnError;
 
-            this.connection = connection;
+            connections.TryAdd(connection.connectionID, connection);
         }
 
-        private async void OnMessage(string message)
+        private async void OnMessage(string message, Guid connectionID)
         {
-            if(connection == null) return;
+            if (!connections.TryGetValue(connectionID, out WebSocketConnection? connection) || connection == null) return;
 
             Console.WriteLine("Message received: " + message);
 
@@ -65,18 +68,63 @@ namespace ServerPresentation
             else if(serializer.GetCommandHeader(message) == GetBooksCommand.StaticHeader)
             {
                 GetBooksCommand sellBook = serializer.Deserialize<GetBooksCommand>(message);
-                await SendBooks();
+                await SendBooks(connectionID);
             }
             else if(serializer.GetCommandHeader(message) == GetUserCommand.StaticHeader)
             {
                 GetUserCommand userCommand = serializer.Deserialize<GetUserCommand>(message);
-                await SendUser(userCommand.Username);
+                await SendUser(userCommand.Username,connectionID);
+            } 
+            else if(serializer.GetCommandHeader(message) == SubscribeToNewsletterUpdatesCommand.StaticHeader)
+            {
+                SubscribeToNewsletterUpdatesCommand command = serializer.Deserialize<SubscribeToNewsletterUpdatesCommand>(message);
+                if (command.Subscribed)
+                {
+                    if (!Subscriptions.TryGetValue(connectionID, out ConnectionSubscription? sub) && connections.TryGetValue(connectionID,out WebSocketConnection? connect))
+                    {
+                        Console.WriteLine("Adding connection [" + connectionID + "] to subsciber list");
+
+                        Subscriptions.Add(connectionID, new ConnectionSubscription(async (x,y) => 
+                        { 
+                            NewsletterSubsciptionEventArgs args = (NewsletterSubsciptionEventArgs)x;
+
+                            Console.WriteLine("Sending newsletter update to " + connectionID +"...");
+
+                            NewsletterUpdateResponse response = new NewsletterUpdateResponse();
+                            response.Number = args.Number;
+                            string json = serializer.Serialize(response);
+
+                            Console.WriteLine(json);
+
+                            await y.SendAsync(json);
+                        },logicAPI.BookService,connect));
+                    } 
+                    else
+                    {
+                        Console.WriteLine("Couldn't add connection [" + connectionID + "] to subsciber list. It's already present");
+                    }
+                } 
+                else {
+                    Console.WriteLine("Removing connection [" + connectionID + "] from subsciber list...");
+                    if(Subscriptions.TryGetValue(connectionID, out ConnectionSubscription? sub))
+                    {
+                        sub.OnCompleted();
+                        if (Subscriptions.Remove(connectionID))
+                        {
+                            Console.WriteLine("Successfuly removed connection [" + connectionID + "] from subsciber list");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Removed connection [" + connectionID + "] from subsciber list failed");
+                        }
+                    }
+                }
             }
         }
 
-        private async Task SendUser(string username)
+        private async Task SendUser(string username, Guid connectionID)
         {
-            if (connection == null) return;
+            if (!connections.TryGetValue(connectionID, out WebSocketConnection? connection) || connection == null) return;
 
             Console.WriteLine("Sending user data...");
 
@@ -90,9 +138,9 @@ namespace ServerPresentation
             await connection.SendAsync(json);
         }
 
-        private async Task SendBooks()
+        private async Task SendBooks(Guid connectionID)
         {
-            if(connection == null) return;
+            if(!connections.TryGetValue(connectionID, out WebSocketConnection? connection) || connection == null) return;
 
             Console.WriteLine("Sending books' data...");
 
@@ -107,25 +155,51 @@ namespace ServerPresentation
             await connection.SendAsync(json);
         }
 
+        private async void HandleSubRaised(int count)
+        {
+            if (connections.Count == 0) return;
+
+            Console.WriteLine("Sending newsletter update...");
+
+            Serializer serializer = Serializer.Create();
+
+            NewsletterUpdateResponse response = new NewsletterUpdateResponse();
+            response.Number = count;
+            string json = serializer.Serialize(response);
+
+            Console.WriteLine(json);
+
+            foreach (Guid subID in Subs)
+            {
+                if(connections.TryGetValue(subID, out WebSocketConnection? connection))
+                {
+                    await connection.SendAsync(json);
+                }
+            }
+        }
+
         private async void HandleBookRepositoryChanged(object sender, LogicBookRepositoryChangedEventArgs e)
         {
-            if(connection == null) return;
+            if(connections.Count == 0) return;
 
             Console.WriteLine("Changed book n.o: " + e.AffectedBook.Id);
 
             BookChangedResponse bookChangedResponse = new BookChangedResponse(e.ChangedEventType);
-            bookChangedResponse.book = e.AffectedBook.ConvertToDTO();
-            
+            bookChangedResponse.Book = e.AffectedBook.ConvertToDTO();
+
             Serializer serializer = Serializer.Create();
             string json = serializer.Serialize(bookChangedResponse);
             Console.WriteLine(json);
 
-            await connection.SendAsync(json);
+            foreach(var connection in connections)
+            {
+                await connection.Value.SendAsync(json);
+            }
         }
 
         private async void HandleUserChanged(object sender, LogicUserChangedEventArgs e)
         {
-            if(connection == null) return;
+            if(connections.Count == 0) return;
 
             Console.WriteLine("User changed: " + e.user.Name);
 
@@ -136,18 +210,29 @@ namespace ServerPresentation
             string json = serializer.Serialize(userChangedResponse);
             Console.WriteLine(json);
 
-            await connection.SendAsync(json);
+            foreach (var connection in connections)
+            {
+                await connection.Value.SendAsync(json);
+            }
         }
 
-        private void OnClose()
+        private void OnClose(Guid connectionID)
         {
             Console.WriteLine("Connection closed");
-            connection = null;
+            connections.Remove(connectionID);
+            if (Subscriptions.TryGetValue(connectionID, out ConnectionSubscription? sub))
+            {
+                sub.OnCompleted();
+                if (Subscriptions.Remove(connectionID))
+                {
+                    Console.WriteLine("Successfuly removed connection [" + connectionID + "] from subsciber list");
+                }
+            }
         }
 
-        private void OnError()
+        private void OnError(Guid connectionID)
         {
-            Console.WriteLine("Error!");
+            Console.WriteLine("Error encountered with connection n.o: " + connectionID);
         }
 
         private static async Task Main(string[] args)

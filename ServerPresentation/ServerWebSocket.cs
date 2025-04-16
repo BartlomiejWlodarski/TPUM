@@ -1,4 +1,4 @@
-﻿using ClientAPI;
+﻿using ConnectionAPI;
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;
@@ -41,6 +41,7 @@ namespace ServerPresentation
             {
                 this.socket = socket;
                 this._endpoint = endpoint;
+                this.connectionID = Guid.NewGuid();
                 _ = Task.Run(() => ServerMessageLoop(socket));
             }
 
@@ -59,13 +60,13 @@ namespace ServerPresentation
                     catch (Exception ex)
                     {
                         Console.WriteLine($"[SendTask] Server send error: {ex}");
-                        OnError?.Invoke();
+                        OnError?.Invoke(connectionID);
                     }
                 }
                 else
                 {
                     Console.WriteLine($"[SendTask] Cannot send — socket state: {socket.State}");
-                    OnError?.Invoke();
+                    OnError?.Invoke(connectionID);
                 }
             }
 
@@ -75,7 +76,7 @@ namespace ServerPresentation
                 {
                     await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Shutting down", CancellationToken.None);
                 }
-                OnClose?.Invoke();
+                OnClose?.Invoke(connectionID);
             }
 
             public override string ToString() => _endpoint.ToString();
@@ -93,7 +94,7 @@ namespace ServerPresentation
                         if (result.MessageType == WebSocketMessageType.Close)
                         {
                             await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Server closing", CancellationToken.None);
-                            OnClose?.Invoke();
+                            OnClose?.Invoke(connectionID);
                             return;
                         }
 
@@ -103,7 +104,7 @@ namespace ServerPresentation
                             if (count >= buffer.Length)
                             {
                                 await webSocket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "Too long message", CancellationToken.None);
-                                OnClose?.Invoke();
+                                OnClose?.Invoke(connectionID);
                                 return;
                             }
 
@@ -113,14 +114,14 @@ namespace ServerPresentation
                         }
 
                         string message = Encoding.UTF8.GetString(buffer, 0, count);
-                        OnMessage?.Invoke(message);
+                        OnMessage?.Invoke(message, connectionID);
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"[ServerMessageLoop] Exception: {ex}");
                     await webSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, "Exception occurred", CancellationToken.None);
-                    OnError?.Invoke();
+                    OnError?.Invoke(connectionID);
                 }
             }
         }

@@ -1,5 +1,5 @@
 ﻿using ClientData.Abstract;
-using ClientAPI;
+using ConnectionAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,9 +25,9 @@ namespace ClientData
                 Logger?.Invoke($"Connecting to {peerUri}");
                 WebSocketConnection = await WebSocketClient.Connect(peerUri, Logger);
                 OnConnectStateChanged?.Invoke();
-                WebSocketConnection.OnMessage = (message) => OnMessage?.Invoke(message);
-                WebSocketConnection.OnError = () => OnError?.Invoke();
-                WebSocketConnection.OnClose = () => OnDisconnect?.Invoke();
+                WebSocketConnection.OnMessage = (message,guid) => OnMessage?.Invoke(message);
+                WebSocketConnection.OnError = (guid) => OnError?.Invoke();
+                WebSocketConnection.OnClose = (guid) => OnDisconnect?.Invoke();
             }
             catch (WebSocketException exception)
             {
@@ -35,8 +35,6 @@ namespace ClientData
                 OnError?.Invoke();
             }
         }
-
-
 
         public async Task Disconnect()
         {

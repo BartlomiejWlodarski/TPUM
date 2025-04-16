@@ -1,9 +1,16 @@
-﻿namespace ClientAPI
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+
+namespace ConnectionAPI
 {
     [Serializable]
     public abstract class ServerCommand
     {
-        public string Header;
+        public string Header { get; set; }
 
         protected ServerCommand(string header)
         {
@@ -19,16 +26,27 @@
         public GetBooksCommand() : base(StaticHeader) { }
     }
 
+
+    [Serializable]
+    public class SubscribeToNewsletterUpdatesCommand : ServerCommand
+    {
+        public static string StaticHeader = "SubscribeToNewsletterUpdates";
+
+        public bool Subscribed { get; set; }
+
+        public SubscribeToNewsletterUpdatesCommand() : base(StaticHeader) { }
+    }
+
     [Serializable]
     public class SellBookCommand : ServerCommand
     {
         public static string StaticHeader = "SellBook";
 
-        public int BookID;
-        public string Username = "";
+        public int BookID { get; set; }
+        public string Username { get; set; } = "";
 
         public SellBookCommand() : base(StaticHeader) { }
-        public SellBookCommand(int id, string username) : base(StaticHeader) 
+        public SellBookCommand(int id, string username) : base(StaticHeader)
         {
             BookID = id;
             Username = username;
@@ -40,7 +58,7 @@
     {
         public static string StaticHeader = "GetUser";
 
-        public string Username;
+        public string Username { get; set; }
 
         public GetUserCommand(string username) : base(StaticHeader)
         {
@@ -50,12 +68,12 @@
     [Serializable]
     public struct BookDTO
     {
-        public int Id;
-        public string Title;
-        public string Author;
-        public decimal Price;
-        public bool Recommended;
-        public int Genre;
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Author { get; set; }
+        public decimal Price { get; set; }
+        public bool Recommended { get; set; }
+        public int Genre { get; set; }
 
         public BookDTO(int Id, string title, string author, decimal Price, bool Recommended, int Genre)
         {
@@ -71,9 +89,9 @@
     [Serializable]
     public struct UserDTO
     {
-        public string Username;
-        public decimal Balance;
-        public BookDTO[] Books;
+        public string Username { get; set; }
+        public decimal Balance { get; set; }
+        public BookDTO[] Books { get; set; }
 
         public UserDTO(string username, decimal balance, BookDTO[] booksId)
         {
@@ -98,7 +116,7 @@
     {
         public static readonly string StaticHeader = "AllBooksUpdate";
 
-        public BookDTO[]? Books;
+        public BookDTO[]? Books { get; set; }
 
         public AllBooksUpdateResponse() : base(StaticHeader) { }
     }
@@ -108,11 +126,11 @@
     {
         public static readonly string StaticHeader = "BookChanged";
 
-        public BookDTO book;
-        public int changeType;
+        public BookDTO Book { get; set; }
+        public int ChangeType { get; set; }
 
         public BookChangedResponse() : base(StaticHeader) { }
-        public BookChangedResponse(int change) : base(StaticHeader) { changeType = change; }
+        public BookChangedResponse(int change) : base(StaticHeader) { ChangeType = change; }
     }
 
 
@@ -121,13 +139,13 @@
     {
         public static readonly string StaticHeader = "TransactactionResult";
 
-        public int BookID;
-        public string Username;
-        public int ResultCode; 
+        public int BookID { get; set; }
+        public string Username { get; set; }
+        public int ResultCode { get; set; }
         // 0 - success 1 - not enought money 2 - book not found 3 - user not found 4 - unknown error
 
-        public TransactionResultResponse(int bookId, string username, int resultCode) : base(StaticHeader) 
-        {  
+        public TransactionResultResponse(int bookId, string username, int resultCode) : base(StaticHeader)
+        {
             BookID = bookId;
             Username = username;
             ResultCode = resultCode;
@@ -139,9 +157,17 @@
     {
         public static readonly string StaticHeader = "UserChanged";
 
-        public UserDTO User;
+        public UserDTO User { get; set; }
 
         public UserChangedResponse() : base(StaticHeader) { }
     }
 
+    [Serializable]
+    public class NewsletterUpdateResponse : ServerResponse
+    {
+        public static readonly string StaticHeader = "NewsletterSend";
+        public int Number { get; set; }
+
+        public NewsletterUpdateResponse() : base(StaticHeader) { }
+    }
 }
