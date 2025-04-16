@@ -14,7 +14,6 @@ namespace ServerPresentation
         private readonly AbstractLogicAPI logicAPI;
 
         private Dictionary<Guid, WebSocketConnection> connections = new();
-        private List<Guid> Subs = new();
         private Dictionary<Guid,ConnectionSubscription> Subscriptions = new();
 
         private ServerPresentation(AbstractLogicAPI logicAPI)
@@ -22,7 +21,6 @@ namespace ServerPresentation
             this.logicAPI = logicAPI;
             this.logicAPI.BookService.BookRepositoryChanged += HandleBookRepositoryChanged;
             this.logicAPI.BookService.UserChanged += HandleUserChanged;
-            this.logicAPI.BookService.SubscriptionEvent += HandleSubRaised;
         }
 
         private async Task StartConnection()
@@ -153,29 +151,6 @@ namespace ServerPresentation
             Console.WriteLine(json);
 
             await connection.SendAsync(json);
-        }
-
-        private async void HandleSubRaised(int count)
-        {
-            if (connections.Count == 0) return;
-
-            Console.WriteLine("Sending newsletter update...");
-
-            Serializer serializer = Serializer.Create();
-
-            NewsletterUpdateResponse response = new NewsletterUpdateResponse();
-            response.Number = count;
-            string json = serializer.Serialize(response);
-
-            Console.WriteLine(json);
-
-            foreach (Guid subID in Subs)
-            {
-                if(connections.TryGetValue(subID, out WebSocketConnection? connection))
-                {
-                    await connection.SendAsync(json);
-                }
-            }
         }
 
         private async void HandleBookRepositoryChanged(object sender, LogicBookRepositoryChangedEventArgs e)

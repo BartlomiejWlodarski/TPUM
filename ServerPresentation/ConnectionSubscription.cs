@@ -14,7 +14,7 @@ namespace TPUMProject.ServerPresentation
         private WebSocketConnection _connection;
         IDisposable SubscriptionLink;
 
-        public ConnectionSubscription(Action<SubscriptionEventArgs,WebSocketConnection> subscriptionAction,IBookService service,WebSocketConnection connection )
+        public ConnectionSubscription(Action<SubscriptionEventArgs,WebSocketConnection> subscriptionAction,IBookService service,WebSocketConnection connection)
         {
             _subscriptionAction = subscriptionAction;
             SubscriptionLink = service.Subscribe(this);

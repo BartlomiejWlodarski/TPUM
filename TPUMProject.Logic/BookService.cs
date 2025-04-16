@@ -10,7 +10,6 @@ namespace TPUMProject.Logic
 
         public event EventHandler<LogicBookRepositoryChangedEventArgs>? BookRepositoryChanged;
         public event EventHandler<LogicUserChangedEventArgs>? UserChanged;
-        public event Action<int>? SubscriptionEvent;
 
         private HashSet<IObserver<SubscriptionEventArgs>> observers;
 
@@ -91,7 +90,6 @@ namespace TPUMProject.Logic
 
         public void SendNewsLetter()
         {
-            //SubscriptionEvent?.Invoke(newsletterCount);
             foreach (IObserver<SubscriptionEventArgs>? observer in observers)
             {
                 observer.OnNext(new NewsletterSubsciptionEventArgs(newsletterCount));
